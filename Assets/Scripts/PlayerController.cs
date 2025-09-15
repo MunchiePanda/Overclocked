@@ -30,6 +30,7 @@ public class PlayerController : MonoBehaviour
     private Alteruna.Avatar _avatar;
     private IInteractable currentInteractable;
     private IInteractable lastInteractable;
+    private Animator animator;
 
 
 
@@ -44,6 +45,8 @@ public class PlayerController : MonoBehaviour
         playerCamera = Camera.main;
         playerCamera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraYOffset, transform.position.z);
         playerCamera.transform.SetParent(transform);
+        animator = GetComponent<Animator>();
+
         // Lock cursor
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -55,6 +58,7 @@ public class PlayerController : MonoBehaviour
             return;
 
         bool isRunning = false;
+        bool isWalking = false;
 
         // Press Left Shift to run
         isRunning = Input.GetKey(KeyCode.LeftShift);
@@ -68,9 +72,18 @@ public class PlayerController : MonoBehaviour
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
+        // Check if player is walking or running
+        isWalking = !isRunning && (Mathf.Abs(Input.GetAxis("Vertical")) > 0.1f || Mathf.Abs(Input.GetAxis("Horizontal")) > 0.1f);
+
+        // Update animator parameters
+        animator.SetBool("IsRunning", isRunning && (Mathf.Abs(Input.GetAxis("Vertical")) > 0.1f || Mathf.Abs(Input.GetAxis("Horizontal")) > 0.1f));
+        animator.SetBool("IsWalking", isWalking);
+        animator.SetBool("IsGrounded", characterController.isGrounded);
+
         if (Input.GetButton("Jump") && canMove && characterController.isGrounded)
         {
             moveDirection.y = jumpSpeed;
+            animator.SetTrigger("IsJumping");
         }
         else
         {

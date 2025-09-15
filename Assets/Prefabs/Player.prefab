@@ -135,6 +135,10 @@ MonoBehaviour:
   gravity: 20
   lookSpeed: 2
   lookXLimit: 45
+  maxInteractionDistance: 50
+  interactableLayer:
+    serializedVersion: 2
+    m_Bits: 64
   canMove: 1
   cameraYOffset: 0.4
 --- !u!1 &4748222637987519609

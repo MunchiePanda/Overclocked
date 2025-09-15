@@ -13,6 +13,10 @@ public class PlayerController : MonoBehaviour
     public float lookSpeed = 2.0f;
     public float lookXLimit = 45.0f;
 
+    [Header("Interaction setup")]
+    public float maxInteractionDistance = 3f;
+    public LayerMask interactableLayer;
+
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
     float rotationX = 0;
@@ -23,8 +27,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float cameraYOffset = 0.4f;
     private Camera playerCamera;
-
     private Alteruna.Avatar _avatar;
+    private IInteractable currentInteractable;
+    private IInteractable lastInteractable;
+
+
 
     void Start()
     {
@@ -85,6 +92,66 @@ public class PlayerController : MonoBehaviour
             rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
             playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
             transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
+        }
+
+        // Interaction logic
+        HandleInteraction();
+    }
+
+    private void HandleInteraction()
+    {
+        // Reset current interactable
+        currentInteractable = null;
+
+        // Raycast to detect interactable objects
+        Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        Debug.DrawRay(ray.origin, ray.direction * maxInteractionDistance, Color.red);
+        Debug.Log($"Raycast origin: {ray.origin}, direction: {ray.direction}");
+
+        if (Physics.Raycast(ray, out RaycastHit hit, maxInteractionDistance, interactableLayer))
+        {
+            Debug.Log($"Raycast hit: {hit.collider.name} at distance {hit.distance}");
+            IInteractable interactable = hit.collider.GetComponent<IInteractable>();
+            if (interactable != null)
+            {
+                Debug.Log($"Found interactable: {hit.collider.name}");
+                currentInteractable = interactable;
+                currentInteractable.OnHover();
+            }
+            else
+            {
+                Debug.Log($"Hit {hit.collider.name}, but it is not interactable.");
+            }
+        }
+        else
+        {
+            Debug.Log("Raycast did not hit anything.");
+        }
+
+        // If no interactable is detected, notify the last one to exit hover state
+        if (currentInteractable == null && lastInteractable != null)
+        {
+            Debug.Log($"No interactable detected. Exiting hover state for {lastInteractable}");
+            lastInteractable.OnHoverExit();
+            lastInteractable = null;
+        }
+
+        // If a new interactable is detected, update lastInteractable
+        if (currentInteractable != null && lastInteractable != currentInteractable)
+        {
+            if (lastInteractable != null)
+            {
+                Debug.Log($"New interactable detected. Exiting hover state for {lastInteractable}");
+                lastInteractable.OnHoverExit();
+            }
+            lastInteractable = currentInteractable;
+        }
+
+        // Handle interaction input
+        if (Input.GetKeyDown(KeyCode.E) && currentInteractable != null)
+        {
+            Debug.Log($"Interacting with {currentInteractable}");
+            currentInteractable.OnInteract();
         }
     }
 }

@@ -3,37 +3,22 @@ using TMPro;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(AudioSource))]
 public class TerminalController : MonoBehaviour
 {
     [Header("UI References")]
-    [Tooltip("The root UI panel for the terminal")]
-    public GameObject terminalUI;
-
-    [Tooltip("Text display for hints")]
-    public TMP_Text hintText;
-
-    [Tooltip("Buttons for puzzle selection")]
-    public Button button1, button2, button3;
-
-    [Tooltip("Text for the buttons")]
-    public TMP_Text buttonText1, buttonText2, buttonText3;
-
-    [Tooltip("Button to close the terminal")]
-    public Button closeButton;
-
-    [Tooltip("Header text for the terminal")]
-    public TMP_Text terminalHeader;
-
-    [Tooltip("Instruction text")]
-    public TMP_Text instructionText;
-
-    [Header("Camera Settings")]
-    [Tooltip("Reference to the CameraSwitcher component")]
-    public CameraSwitcher cameraSwitcher;
+    public GameObject terminalUI;          // The root UI panel
+    public TMP_Text hintText;             // Text display for hints
+    public Button button1;                // Button for puzzle 1
+    public Button button2;                // Button for puzzle 2
+    public Button button3;                // Button for puzzle 3
+    public TMP_Text buttonText1;          // Text for button 1
+    public TMP_Text buttonText2;          // Text for button 2
+    public TMP_Text buttonText3;          // Text for button 3
+    public Button closeButton;            // Button to close the terminal
+    public TMP_Text terminalHeader;       // Header text for the terminal
+    public TMP_Text instructionText;      // Instruction text
 
     [Header("Puzzle Settings")]
-    [Tooltip("Names of the puzzles")]
     public List<string> puzzleNames = new List<string>
     {
         "Main Reactor Puzzle",
@@ -41,7 +26,6 @@ public class TerminalController : MonoBehaviour
         "Navigation System Puzzle"
     };
 
-    [Tooltip("Hints for each puzzle")]
     public List<string> puzzleHints = new List<string>
     {
         "MAIN REACTOR PUZZLE:\n\nTo stabilize the reactor core, you must align the three control rods in the correct sequence. " +
@@ -68,74 +52,27 @@ public class TerminalController : MonoBehaviour
     };
 
     [Header("Terminal Settings")]
-    [Tooltip("Speed for the typing effect")]
-    [Range(0.01f, 0.2f)]
-    public float typingSpeed = 0.03f;
+    public float typingSpeed = 0.03f;       // Speed for the typing effect
+    public AudioClip buttonPressSound;    // Sound for button presses
+    public AudioClip terminalOpenSound;   // Sound for terminal opening
+    public AudioClip terminalCloseSound;  // Sound for terminal closing
+    public AudioClip puzzleCompleteSound; // Sound for puzzle completion
 
-    [Tooltip("Sound for button presses")]
-    public AudioClip buttonPressSound;
+    [Header("Camera Settings")]
+    public Camera mainCamera;             // Main game camera
+    public Camera terminalCamera;         // Camera for terminal view
 
-    [Tooltip("Sound for terminal opening")]
-    public AudioClip terminalOpenSound;
-
-    [Tooltip("Sound for terminal closing")]
-    public AudioClip terminalCloseSound;
-
-    [Tooltip("Sound for puzzle completion")]
-    public AudioClip puzzleCompleteSound;
-
-    // Private variables
     private AudioSource audioSource;
     private bool isTerminalActive = false;
     private Coroutine typingCoroutine;
     private int currentPuzzleIndex = -1;
     private bool[] puzzlesCompleted = new bool[3]; // Track which puzzles are completed
 
-    // Initialize references
-    private void OnValidate()
-    {
-        // Auto-assign AudioSource if missing
-        if (GetComponent<AudioSource>() == null)
-        {
-            gameObject.AddComponent<AudioSource>();
-        }
-
-        // Try to find CameraSwitcher if not assigned
-        if (cameraSwitcher == null)
-        {
-            cameraSwitcher = GetComponent<CameraSwitcher>();
-            if (cameraSwitcher == null)
-            {
-                cameraSwitcher = GetComponentInChildren<CameraSwitcher>();
-            }
-        }
-    }
-
     void Start()
     {
-        // Get or create AudioSource
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
-
-        // Try to find or create CameraSwitcher
-        if (cameraSwitcher == null)
-        {
-            cameraSwitcher = GetComponent<CameraSwitcher>();
-            if (cameraSwitcher == null)
-            {
-                cameraSwitcher = gameObject.AddComponent<CameraSwitcher>();
-                Debug.Log("Added CameraSwitcher component to " + gameObject.name);
-            }
-        }
-
-        // Initialize UI
+        // Initialize the terminal UI
         if (terminalUI != null)
-        {
             terminalUI.SetActive(false);
-        }
 
         // Set up button texts
         UpdateButtonTexts();
@@ -145,6 +82,15 @@ public class TerminalController : MonoBehaviour
         if (button2 != null) button2.onClick.AddListener(() => OnPuzzleButtonClicked(1));
         if (button3 != null) button3.onClick.AddListener(() => OnPuzzleButtonClicked(2));
         if (closeButton != null) closeButton.onClick.AddListener(ToggleTerminal);
+
+        // Set up audio
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
+
+        // Initialize camera settings
+        if (mainCamera != null) mainCamera.enabled = true;
+        if (terminalCamera != null) terminalCamera.enabled = false;
     }
 
     void Update()
@@ -164,19 +110,13 @@ public class TerminalController : MonoBehaviour
                 OnPuzzleButtonClicked(1);
             else if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3))
                 OnPuzzleButtonClicked(2);
-            else if (Input.GetKeyDown(KeyCode.Return) && currentPuzzleIndex >= 0 && !puzzlesCompleted[currentPuzzleIndex])
-                OnPuzzleSolved();
         }
     }
 
     public void ToggleTerminal()
     {
         isTerminalActive = !isTerminalActive;
-
-        if (terminalUI != null)
-        {
-            terminalUI.SetActive(isTerminalActive);
-        }
+        terminalUI.SetActive(isTerminalActive);
 
         if (isTerminalActive)
         {
@@ -184,39 +124,24 @@ public class TerminalController : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
 
-            // Switch cameras if CameraSwitcher is available
-            if (cameraSwitcher != null)
-            {
-                cameraSwitcher.ToggleCamera();
-            }
-            else
-            {
-                Debug.LogWarning("No CameraSwitcher assigned. Terminal UI will appear without camera switch.");
-            }
+            // Switch cameras
+            if (mainCamera != null) mainCamera.enabled = false;
+            if (terminalCamera != null) terminalCamera.enabled = true;
 
-            // Play open sound
-            if (terminalOpenSound != null && audioSource != null)
-            {
+            if (terminalOpenSound != null)
                 audioSource.PlayOneShot(terminalOpenSound);
-            }
 
             // Clear any existing text
             if (hintText != null)
-            {
                 hintText.text = "";
-            }
 
             // Set header text
             if (terminalHeader != null)
-            {
                 terminalHeader.text = "COMPUTER TERMINAL - PUZZLE ASSISTANCE SYSTEM";
-            }
 
             // Set instruction text
             if (instructionText != null)
-            {
                 instructionText.text = "Select a puzzle (1-3) for assistance. Press ESC to exit.";
-            }
         }
         else
         {
@@ -224,17 +149,12 @@ public class TerminalController : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
 
-            // Switch cameras back if CameraSwitcher is available
-            if (cameraSwitcher != null)
-            {
-                cameraSwitcher.ToggleCamera();
-            }
+            // Switch cameras
+            if (mainCamera != null) mainCamera.enabled = true;
+            if (terminalCamera != null) terminalCamera.enabled = false;
 
-            // Play close sound
-            if (terminalCloseSound != null && audioSource != null)
-            {
+            if (terminalCloseSound != null)
                 audioSource.PlayOneShot(terminalCloseSound);
-            }
 
             // Stop any typing animation
             if (typingCoroutine != null)
@@ -258,10 +178,8 @@ public class TerminalController : MonoBehaviour
         if (puzzleIndex >= 0 && puzzleIndex < puzzleHints.Count)
         {
             // Play button sound
-            if (buttonPressSound != null && audioSource != null)
-            {
+            if (buttonPressSound != null)
                 audioSource.PlayOneShot(buttonPressSound);
-            }
 
             // Update current puzzle index
             currentPuzzleIndex = puzzleIndex;
@@ -291,10 +209,8 @@ public class TerminalController : MonoBehaviour
             puzzlesCompleted[currentPuzzleIndex] = true;
             UpdateButtonTexts();
 
-            if (puzzleCompleteSound != null && audioSource != null)
-            {
+            if (puzzleCompleteSound != null)
                 audioSource.PlayOneShot(puzzleCompleteSound);
-            }
 
             if (typingCoroutine != null)
             {
@@ -315,6 +231,15 @@ public class TerminalController : MonoBehaviour
 
         if (buttonText3 != null && puzzleNames.Count > 2)
             buttonText3.text = "3. " + puzzleNames[2] + (puzzlesCompleted[2] ? " [SOLVED]" : "");
+    }
+
+    private string GetPuzzleHint(int puzzleIndex)
+    {
+        if (puzzleIndex >= 0 && puzzleIndex < puzzleHints.Count)
+        {
+            return puzzleHints[puzzleIndex];
+        }
+        return "No hint available for this puzzle.";
     }
 
     private System.Collections.IEnumerator TypeText(string text)

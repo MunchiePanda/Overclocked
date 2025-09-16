@@ -2,48 +2,125 @@ using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
-/// Manages all puzzles in the game
+/// Manages all puzzles in the escape room game - Updated for new system
 /// </summary>
 public class PuzzleManager : MonoBehaviour
 {
+    [Header("Puzzle References")]
     [Tooltip("List of all puzzles in the game")]
     public List<BasePuzzle> puzzles = new List<BasePuzzle>();
 
-    [Tooltip("Index of the current active puzzle")]
-    private int currentPuzzleIndex = -1;
+    [Header("System References")]
+    [Tooltip("Reference to the new AI Terminal Controller")]
+    public TerminalControllerNew terminalController;
+    
+    [Tooltip("Reference to the Escape Code Manager")]
+    public EscapeCodeManager escapeCodeManager;
 
-    [Tooltip("Reference to the TerminalController")]
-    public TerminalController terminalController;
+    [Header("Auto-Discovery")]
+    [Tooltip("Automatically find puzzles in the scene on start")]
+    public bool autoDiscoverPuzzles = true;
+
+    private int currentPuzzleIndex = -1;
 
     /// <summary>
     /// Initialize the puzzle manager
     /// </summary>
     void Start()
     {
+        if (autoDiscoverPuzzles)
+        {
+            DiscoverPuzzlesInScene();
+        }
+
         // Initialize all puzzles
         foreach (BasePuzzle puzzle in puzzles)
         {
             if (puzzle != null)
             {
                 puzzle.Initialize();
-                puzzle.onPuzzleCompleted.AddListener(OnPuzzleCompleted);
+                puzzle.onPuzzleCompleted.AddListener(() => OnPuzzleCompleted(puzzle));
             }
         }
 
-        Debug.Log("PuzzleManager initialized with " + puzzles.Count + " puzzles");
+        // Find system components if not assigned
+        if (terminalController == null)
+            terminalController = FindObjectOfType<TerminalControllerNew>();
+            
+        if (escapeCodeManager == null)
+            escapeCodeManager = FindObjectOfType<EscapeCodeManager>();
+
+        Debug.Log($"PuzzleManager initialized with {puzzles.Count} puzzles");
+    }
+
+    /// <summary>
+    /// Automatically discover puzzles in the scene
+    /// </summary>
+    private void DiscoverPuzzlesInScene()
+    {
+        // Find all puzzle types
+        CipherWheelPuzzle[] cipherPuzzles = FindObjectsOfType<CipherWheelPuzzle>();
+        FrequencyResonancePuzzle[] frequencyPuzzles = FindObjectsOfType<FrequencyResonancePuzzle>();
+        ShadowLogicPuzzle[] shadowPuzzles = FindObjectsOfType<ShadowLogicPuzzle>();
+
+        // Add them to the list if not already present
+        foreach (var puzzle in cipherPuzzles)
+        {
+            if (!puzzles.Contains(puzzle))
+                puzzles.Add(puzzle);
+        }
+        
+        foreach (var puzzle in frequencyPuzzles)
+        {
+            if (!puzzles.Contains(puzzle))
+                puzzles.Add(puzzle);
+        }
+        
+        foreach (var puzzle in shadowPuzzles)
+        {
+            if (!puzzles.Contains(puzzle))
+                puzzles.Add(puzzle);
+        }
+
+        Debug.Log($"Auto-discovered {puzzles.Count} puzzles in scene");
     }
 
     /// <summary>
     /// Called when a puzzle is completed
     /// </summary>
-    private void OnPuzzleCompleted()
+    private void OnPuzzleCompleted(BasePuzzle completedPuzzle)
     {
-        Debug.Log("Puzzle completed! Updating terminal...");
+        Debug.Log($"Puzzle completed: {completedPuzzle.puzzleName}");
 
+        // Update the terminal to show this puzzle as solved
         if (terminalController != null)
         {
-            // Update the terminal to reflect the completed puzzle
-            // This will be implemented based on your terminal system
+            terminalController.OnPuzzleSolved();
+        }
+
+        // Check if all puzzles are completed
+        CheckGameCompletion();
+    }
+
+    /// <summary>
+    /// Check if all puzzles are completed
+    /// </summary>
+    private void CheckGameCompletion()
+    {
+        int completedCount = 0;
+        foreach (BasePuzzle puzzle in puzzles)
+        {
+            if (puzzle != null && puzzle.IsCompleted())
+            {
+                completedCount++;
+            }
+        }
+
+        Debug.Log($"Puzzles completed: {completedCount}/{puzzles.Count}");
+
+        if (completedCount >= puzzles.Count && escapeCodeManager != null)
+        {
+            Debug.Log("All puzzles completed! Escape code should be ready.");
         }
     }
 
@@ -64,11 +141,11 @@ public class PuzzleManager : MonoBehaviour
         {
             currentPuzzleIndex = index;
             puzzles[currentPuzzleIndex].ShowPuzzle();
-            Debug.Log("Showing puzzle: " + puzzles[currentPuzzleIndex].puzzleName);
+            Debug.Log($"Showing puzzle: {puzzles[currentPuzzleIndex].puzzleName}");
         }
         else
         {
-            Debug.LogError("Invalid puzzle index: " + index);
+            Debug.LogError($"Invalid puzzle index: {index}");
         }
     }
 
@@ -139,7 +216,37 @@ public class PuzzleManager : MonoBehaviour
                 puzzle.ResetPuzzle();
             }
         }
+        
         currentPuzzleIndex = -1;
+        
+        // Reset the escape code manager too
+        if (escapeCodeManager != null)
+        {
+            escapeCodeManager.ResetEscapeProgress();
+        }
+        
         Debug.Log("All puzzles reset");
+    }
+
+    /// <summary>
+    /// Get total number of puzzles
+    /// </summary>
+    public int GetTotalPuzzleCount()
+    {
+        return puzzles.Count;
+    }
+
+    /// <summary>
+    /// Get number of completed puzzles
+    /// </summary>
+    public int GetCompletedPuzzleCount()
+    {
+        int count = 0;
+        foreach (BasePuzzle puzzle in puzzles)
+        {
+            if (puzzle != null && puzzle.IsCompleted())
+                count++;
+        }
+        return count;
     }
 }

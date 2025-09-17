@@ -7,7 +7,39 @@ using UnityEditor;
 
 public class EscapeRoomSetupHelper : MonoBehaviour
 {
-    [Header("Setup Options")]
+    [Header("🎯 NEW TERMINAL SYSTEM - Unity 6 Compatible")]
+    [Space(10)]
+    [Header("📋 STEP-BY-STEP SETUP GUIDE:")]
+    [Space(5)]
+    [Header("1️⃣ If you don't have puzzles yet, create them using Legacy options below")]
+    [Header("2️⃣ Clean up AI Terminal → 3️⃣ Setup Terminal System → 4️⃣ Create Puzzle Terminals")]
+    [Header("5️⃣ Style All Terminals → 6️⃣ Test Terminal System")]
+    [Space(10)]
+    
+    [Header("🚀 QUICK SETUP")]
+    [Space(5)]
+    [Tooltip("🔥 ONE-CLICK SETUP: Does steps 1-4 automatically!")]
+    public bool doCompleteSetup = false;
+    
+    [Space(10)]
+    
+    [Tooltip("🚀 STEP 1: Clean up and fix existing AI Terminal")]
+    public bool cleanupAITerminal = false;
+    
+    [Tooltip("🎮 STEP 2: Setup complete terminal system")]
+    public bool setupTerminalSystem = false;
+    
+    [Tooltip("🔧 STEP 3: Create individual puzzle terminals")]
+    public bool createPuzzleTerminals = false;
+    
+    [Tooltip("🎨 STEP 4: Style all terminals consistently")]
+    public bool styleAllTerminals = false;
+    
+    [Tooltip("🧪 STEP 5: Test all terminal interactions")]
+    public bool testTerminalSystem = false;
+
+    [Header("🔧 OLD SYSTEM (Legacy)")]
+    [Space(5)]
     [Tooltip("Click to create the EscapeCodeManager GameObject")]
     public bool createEscapeCodeManager = false;
     
@@ -32,6 +64,45 @@ public class EscapeRoomSetupHelper : MonoBehaviour
 
     void OnValidate()
     {
+        // QUICK ONE-CLICK SETUP
+        if (doCompleteSetup)
+        {
+            DoCompleteSetup();
+            doCompleteSetup = false;
+        }
+
+        // NEW TERMINAL SYSTEM SETUP
+        if (cleanupAITerminal)
+        {
+            CleanupAITerminal();
+            cleanupAITerminal = false;
+        }
+        
+        if (setupTerminalSystem)
+        {
+            SetupTerminalSystem();
+            setupTerminalSystem = false;
+        }
+        
+        if (createPuzzleTerminals)
+        {
+            CreatePuzzleTerminals();
+            createPuzzleTerminals = false;
+        }
+        
+        if (styleAllTerminals)
+        {
+            StyleAllTerminals();
+            styleAllTerminals = false;
+        }
+        
+        if (testTerminalSystem)
+        {
+            TestTerminalSystem();
+            testTerminalSystem = false;
+        }
+
+        // LEGACY SYSTEM
         if (createEscapeCodeManager)
         {
             CreateEscapeCodeManager();
@@ -68,6 +139,283 @@ public class EscapeRoomSetupHelper : MonoBehaviour
             createWinScreen = false;
         }
     }
+
+    // ============================================================================
+    // 🎯 NEW TERMINAL SYSTEM SETUP METHODS
+    // ============================================================================
+
+    [ContextMenu("🔥 Complete Terminal Setup (One-Click)")]
+    private void DoCompleteSetup()
+    {
+        Debug.Log("🔥 Starting complete terminal system setup...");
+        
+        // Check if we have an AI Terminal
+        if (GameObject.Find("AITerminal") == null)
+        {
+            Debug.LogError("❌ No AITerminal found! Please create it first using 'Create AI Terminal' in the Legacy section.");
+            return;
+        }
+
+        // Run all setup steps
+        CleanupAITerminal();
+        SetupTerminalSystem();
+        CreatePuzzleTerminals();
+        StyleAllTerminals();
+
+        Debug.Log("🎯 🎉 COMPLETE SETUP FINISHED! Your terminal system is ready!");
+        Debug.Log("📝 Next steps:");
+        Debug.Log("   • Position the terminals around your room as needed");
+        Debug.Log("   • Test the system using 'Test Terminal System'");
+        Debug.Log("   • Run your game and walk up to terminals, press E to interact!");
+    }
+
+    [ContextMenu("🚀 1. Clean Up AI Terminal")]
+    private void CleanupAITerminal()
+    {
+        Debug.Log("🔧 Cleaning up AI Terminal...");
+
+        GameObject aiTerminal = GameObject.Find("AITerminal");
+        if (aiTerminal == null)
+        {
+            Debug.LogError("❌ AITerminal not found! Please create it first using the legacy options.");
+            return;
+        }
+
+        // Remove old InteractableAITerminal component if it exists
+        InteractableAITerminal oldComponent = aiTerminal.GetComponent<InteractableAITerminal>();
+        if (oldComponent != null)
+        {
+            DestroyImmediate(oldComponent);
+            Debug.Log("✅ Removed old InteractableAITerminal component");
+        }
+
+        // Set correct layer
+        int interactableLayer = LayerMask.NameToLayer("Interactable");
+        if (interactableLayer != -1)
+        {
+            aiTerminal.layer = interactableLayer;
+            Debug.Log("✅ Set AITerminal to Interactable layer");
+        }
+
+        // Fix BoxCollider for proper raycasting
+        BoxCollider collider = aiTerminal.GetComponent<BoxCollider>();
+        if (collider != null)
+        {
+            collider.isTrigger = false; // This is important for raycasting!
+            Debug.Log("✅ Set BoxCollider for proper raycasting (isTrigger = false)");
+        }
+
+        // Make sure it has InteractableAITerminalNew
+        if (aiTerminal.GetComponent<InteractableAITerminalNew>() == null)
+        {
+            aiTerminal.AddComponent<InteractableAITerminalNew>();
+            Debug.Log("✅ Added new InteractableAITerminalNew component");
+        }
+
+        Debug.Log("🎯 AI Terminal cleanup complete! Ready for player interaction.");
+    }
+
+    [ContextMenu("🎮 2. Setup Terminal System")]
+    private void SetupTerminalSystem()
+    {
+        Debug.Log("🎮 Setting up complete terminal system...");
+
+        // Create Terminal System Manager
+        GameObject systemManager = GameObject.Find("TerminalSystemManager");
+        if (systemManager == null)
+        {
+            systemManager = new GameObject("TerminalSystemManager");
+            systemManager.AddComponent<TerminalSystemManager>();
+            Debug.Log("✅ Created TerminalSystemManager");
+        }
+
+        // Add TerminalUIHelper if not exists
+        if (GetComponent<TerminalUIHelper>() == null)
+        {
+            gameObject.AddComponent<TerminalUIHelper>();
+            Debug.Log("✅ Added TerminalUIHelper to SetUpHelper");
+        }
+
+        // Add CleanupAITerminal helper if not exists
+        if (GetComponent<CleanupAITerminal>() == null)
+        {
+            gameObject.AddComponent<CleanupAITerminal>();
+            Debug.Log("✅ Added CleanupAITerminal helper");
+        }
+
+        Debug.Log("🎯 Terminal system setup complete!");
+    }
+
+    [ContextMenu("🔧 3. Create Puzzle Terminals")]
+    private void CreatePuzzleTerminals()
+    {
+        Debug.Log("🔧 Creating individual puzzle terminals...");
+
+        TerminalUIHelper uiHelper = GetComponent<TerminalUIHelper>();
+        if (uiHelper == null)
+        {
+            Debug.LogError("❌ TerminalUIHelper not found! Run 'Setup Terminal System' first.");
+            return;
+        }
+
+        // Check if puzzles exist
+        GameObject cipherCanvas = GameObject.Find("CipherWheelCanvas");
+        GameObject shadowCanvas = GameObject.Find("ShadowLogicCanvas");
+        GameObject frequencyCanvas = GameObject.Find("FrequencyCanvas");
+
+        if (cipherCanvas == null && shadowCanvas == null && frequencyCanvas == null)
+        {
+            Debug.LogWarning("⚠️ No puzzle canvases found! Create puzzles first using legacy options.");
+            return;
+        }
+
+        // Create terminals for existing puzzles
+        uiHelper.SetupExistingPuzzleUIs();
+
+        // Position terminals around the room
+        PositionPuzzleTerminals();
+
+        Debug.Log("🎯 Puzzle terminals created! Position them as needed around your room.");
+    }
+
+    private void PositionPuzzleTerminals()
+    {
+        // Position Cipher Wheel Terminal
+        GameObject cipherTerminal = GameObject.Find("CipherWheelTerminal");
+        if (cipherTerminal != null)
+        {
+            cipherTerminal.transform.position = new Vector3(-3, 0.5f, 2);
+            cipherTerminal.transform.rotation = Quaternion.Euler(0, 45, 0);
+            AddTerminalVisuals(cipherTerminal, "Cipher Terminal");
+        }
+
+        // Position Shadow Logic Terminal
+        GameObject shadowTerminal = GameObject.Find("ShadowLogicTerminal");
+        if (shadowTerminal != null)
+        {
+            shadowTerminal.transform.position = new Vector3(3, 0.5f, 2);
+            shadowTerminal.transform.rotation = Quaternion.Euler(0, -45, 0);
+            AddTerminalVisuals(shadowTerminal, "Shadow Terminal");
+        }
+
+        // Position Frequency Terminal (if exists)
+        GameObject freqTerminal = GameObject.Find("FrequencyResonanceTerminal");
+        if (freqTerminal != null)
+        {
+            freqTerminal.transform.position = new Vector3(0, 0.5f, 3);
+            freqTerminal.transform.rotation = Quaternion.identity;
+            AddTerminalVisuals(freqTerminal, "Frequency Terminal");
+        }
+
+        Debug.Log("✅ Positioned all puzzle terminals around the room");
+    }
+
+    private void AddTerminalVisuals(GameObject terminal, string terminalType)
+    {
+        // Make it look like a proper terminal
+        MeshRenderer renderer = terminal.GetComponent<MeshRenderer>();
+        if (renderer != null)
+        {
+            // Create a simple dark material
+            Material terminalMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            terminalMaterial.color = new Color(0.1f, 0.1f, 0.2f, 1f);
+            terminalMaterial.SetFloat("_Metallic", 0.8f);
+            terminalMaterial.SetFloat("_Smoothness", 0.6f);
+            renderer.material = terminalMaterial;
+        }
+
+        // Add a light for visual feedback
+        GameObject lightObj = new GameObject("TerminalLight");
+        lightObj.transform.SetParent(terminal.transform);
+        lightObj.transform.localPosition = new Vector3(0, 1, 0);
+        
+        Light terminalLight = lightObj.AddComponent<Light>();
+        terminalLight.type = LightType.Point;
+        terminalLight.color = Color.cyan;
+        terminalLight.intensity = 0.5f;
+        terminalLight.range = 3f;
+        terminalLight.enabled = false; // Will be controlled by PuzzleTerminal script
+
+        // Connect light to PuzzleTerminal component
+        PuzzleTerminal puzzleTerminal = terminal.GetComponent<PuzzleTerminal>();
+        if (puzzleTerminal != null)
+        {
+            puzzleTerminal.terminalLight = terminalLight;
+        }
+
+        Debug.Log($"✅ Added visuals to {terminalType}");
+    }
+
+    [ContextMenu("🎨 4. Style All Terminals")]
+    private void StyleAllTerminals()
+    {
+        Debug.Log("🎨 Styling all terminals...");
+
+        TerminalUIHelper uiHelper = GetComponent<TerminalUIHelper>();
+        if (uiHelper != null)
+        {
+            uiHelper.StyleAllTerminalUIs();
+        }
+
+        // Style the main AI terminal too
+        GameObject aiTerminal = GameObject.Find("AITerminal");
+        if (aiTerminal != null)
+        {
+            AddTerminalVisuals(aiTerminal, "AI Terminal");
+        }
+
+        Debug.Log("🎯 All terminals styled consistently!");
+    }
+
+    [ContextMenu("🧪 5. Test Terminal System")]
+    private void TestTerminalSystem()
+    {
+        Debug.Log("🧪 Testing terminal system...");
+
+        // Find all terminals
+        PuzzleTerminal[] puzzleTerminals = FindObjectsByType<PuzzleTerminal>(FindObjectsSortMode.None);
+        InteractableAITerminalNew[] aiTerminals = FindObjectsByType<InteractableAITerminalNew>(FindObjectsSortMode.None);
+
+        Debug.Log($"Found {puzzleTerminals.Length} puzzle terminals and {aiTerminals.Length} AI terminals");
+
+        // Test puzzle terminals
+        foreach (PuzzleTerminal terminal in puzzleTerminals)
+        {
+            if (terminal.terminalCanvas == null)
+                Debug.LogWarning($"⚠️ {terminal.name} has no terminal canvas assigned!");
+            
+            if (terminal.terminalLight == null)
+                Debug.LogWarning($"⚠️ {terminal.name} has no terminal light assigned!");
+            else
+                Debug.Log($"✅ {terminal.name} is properly configured");
+        }
+
+        // Test AI terminals
+        foreach (InteractableAITerminalNew aiTerminal in aiTerminals)
+        {
+            if (aiTerminal.terminalController == null)
+                Debug.LogWarning($"⚠️ {aiTerminal.name} has no terminal controller assigned!");
+            else
+                Debug.Log($"✅ {aiTerminal.name} is properly configured");
+        }
+
+        // Check player setup
+        PlayerController[] players = FindObjectsByType<PlayerController>(FindObjectsSortMode.None);
+        if (players.Length == 0)
+        {
+            Debug.LogWarning("⚠️ No PlayerController found! Make sure you have a player in the scene.");
+        }
+        else
+        {
+            Debug.Log($"✅ Found {players.Length} PlayerController(s)");
+        }
+
+        Debug.Log("🎯 Terminal system test complete! Check warnings above if any.");
+    }
+
+    // ============================================================================
+    // 🔧 LEGACY SYSTEM METHODS (Kept for compatibility)
+    // ============================================================================
 
     private void CreateEscapeCodeManager()
     {

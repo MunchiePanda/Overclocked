@@ -236,11 +236,11 @@ public class EscapeRoomSetupHelper : MonoBehaviour
             Debug.Log("✅ Added TerminalUIHelper to SetUpHelper");
         }
 
-        // Add CleanupAITerminal helper if not exists
-        if (GetComponent<CleanupAITerminal>() == null)
+        // Add UIConnectionHelper if not exists
+        if (GetComponent<UIConnectionHelper>() == null)
         {
-            gameObject.AddComponent<CleanupAITerminal>();
-            Debug.Log("✅ Added CleanupAITerminal helper");
+            gameObject.AddComponent<UIConnectionHelper>();
+            Debug.Log("✅ Added UIConnectionHelper to SetUpHelper");
         }
 
         Debug.Log("🎯 Terminal system setup complete!");

@@ -89,7 +89,7 @@ public class Door : MonoBehaviour
             UpdateVisualState();
 
             // Notify escape code manager if this is the final escape
-            EscapeCodeManager escapeManager = FindObjectOfType<EscapeCodeManager>();
+            EscapeCodeManager escapeManager = FindFirstObjectByType<EscapeCodeManager>();
             if (escapeManager != null && escapeManager.IsEscapeCodeReady())
             {
                 escapeManager.OnEscapeSuccessful();

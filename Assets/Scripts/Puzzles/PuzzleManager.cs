@@ -45,10 +45,10 @@ public class PuzzleManager : MonoBehaviour
 
         // Find system components if not assigned
         if (terminalController == null)
-            terminalController = FindObjectOfType<TerminalControllerNew>();
+            terminalController = FindFirstObjectByType<TerminalControllerNew>();
             
         if (escapeCodeManager == null)
-            escapeCodeManager = FindObjectOfType<EscapeCodeManager>();
+            escapeCodeManager = FindFirstObjectByType<EscapeCodeManager>();
 
         Debug.Log($"PuzzleManager initialized with {puzzles.Count} puzzles");
     }
@@ -59,9 +59,9 @@ public class PuzzleManager : MonoBehaviour
     private void DiscoverPuzzlesInScene()
     {
         // Find all puzzle types
-        CipherWheelPuzzle[] cipherPuzzles = FindObjectsOfType<CipherWheelPuzzle>();
-        FrequencyResonancePuzzle[] frequencyPuzzles = FindObjectsOfType<FrequencyResonancePuzzle>();
-        ShadowLogicPuzzle[] shadowPuzzles = FindObjectsOfType<ShadowLogicPuzzle>();
+        CipherWheelPuzzle[] cipherPuzzles = FindObjectsByType<CipherWheelPuzzle>(FindObjectsSortMode.None);
+        FrequencyResonancePuzzle[] frequencyPuzzles = FindObjectsByType<FrequencyResonancePuzzle>(FindObjectsSortMode.None);
+        ShadowLogicPuzzle[] shadowPuzzles = FindObjectsByType<ShadowLogicPuzzle>(FindObjectsSortMode.None);
 
         // Add them to the list if not already present
         foreach (var puzzle in cipherPuzzles)

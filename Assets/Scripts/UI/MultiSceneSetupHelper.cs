@@ -56,11 +56,12 @@ public class MultiSceneSetupHelper : MonoBehaviour
     {
         Debug.Log("🎮 Setting up Start Screen...");
 
-        // Create Canvas if none exists
+        // Find existing Canvas (DO NOT CREATE A NEW ONE)
         Canvas canvas = FindFirstObjectByType<Canvas>();
         if (canvas == null)
         {
-            canvas = CreateStartScreenCanvas();
+            Debug.LogWarning("⚠️ No Canvas found! Please create your own Canvas first.");
+            return;
         }
 
         // Create GameSceneManager

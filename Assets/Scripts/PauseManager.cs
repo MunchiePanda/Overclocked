@@ -70,6 +70,8 @@ public class PauseManager : MonoBehaviour
         }
         else
         {
+            // If this is a duplicate, transfer any assigned GameObjects to the existing instance
+            TransferReferencesToExistingInstance();
             Destroy(gameObject);
             return;
         }
@@ -79,6 +81,41 @@ public class PauseManager : MonoBehaviour
         originalAudioVolume = AudioListener.volume;
         originalCursorLockMode = Cursor.lockState;
         originalCursorVisible = Cursor.visible;
+    }
+
+    /// <summary>
+    /// Transfer GameObject references from this instance to the existing singleton
+    /// </summary>
+    private void TransferReferencesToExistingInstance()
+    {
+        if (Instance != null)
+        {
+            // Transfer objects to show when paused
+            foreach (GameObject obj in objectsToShowWhenPaused)
+            {
+                if (obj != null && !Instance.objectsToShowWhenPaused.Contains(obj))
+                {
+                    Instance.objectsToShowWhenPaused.Add(obj);
+                    if (enableDebugLogs)
+                    {
+                        Debug.Log($"🔄 Transferred {obj.name} to existing PauseManager show list");
+                    }
+                }
+            }
+
+            // Transfer objects to hide when paused
+            foreach (GameObject obj in objectsToHideWhenPaused)
+            {
+                if (obj != null && !Instance.objectsToHideWhenPaused.Contains(obj))
+                {
+                    Instance.objectsToHideWhenPaused.Add(obj);
+                    if (enableDebugLogs)
+                    {
+                        Debug.Log($"🔄 Transferred {obj.name} to existing PauseManager hide list");
+                    }
+                }
+            }
+        }
     }
 
     private void OnEnable()
@@ -122,6 +159,9 @@ public class PauseManager : MonoBehaviour
     public void PauseGame()
     {
         if (isPaused) return;
+
+        // Auto-find pause menu if the list is empty or contains destroyed objects
+        ValidateAndRefreshGameObjectLists();
 
         isPaused = true;
 
@@ -267,6 +307,48 @@ public class PauseManager : MonoBehaviour
                 {
                     Debug.Log($"🎮 Player movement {(disable ? "disabled" : "enabled")}");
                 }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Validate and refresh GameObject lists, auto-finding missing objects
+    /// </summary>
+    private void ValidateAndRefreshGameObjectLists()
+    {
+        // Remove null/destroyed objects
+        objectsToShowWhenPaused.RemoveAll(obj => obj == null);
+        objectsToHideWhenPaused.RemoveAll(obj => obj == null);
+
+        // Auto-find pause menu if the show list is empty
+        if (objectsToShowWhenPaused.Count == 0)
+        {
+            AutoFindPauseMenu();
+        }
+
+        if (enableDebugLogs && objectsToShowWhenPaused.Count == 0)
+        {
+            Debug.LogWarning("⚠️ No GameObjects set to show when paused! Pause menu may not appear.");
+        }
+    }
+
+    /// <summary>
+    /// Automatically find and register pause menu objects
+    /// </summary>
+    private void AutoFindPauseMenu()
+    {
+        // Look for GameObjects with "pause" in the name
+        GameObject[] allObjects = FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+        foreach (GameObject obj in allObjects)
+        {
+            if (obj.name.ToLower().Contains("pause") && obj.GetComponent<Canvas>() != null)
+            {
+                AddObjectToShowWhenPaused(obj);
+                if (enableDebugLogs)
+                {
+                    Debug.Log($"🔍 Auto-found pause menu: {obj.name}");
+                }
+                break;
             }
         }
     }

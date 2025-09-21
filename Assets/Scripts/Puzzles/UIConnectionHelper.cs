@@ -74,12 +74,14 @@ public class UIConnectionHelper : MonoBehaviour
         // Find and connect all UI elements
         puzzle.symbolDisplay = FindUIElement<TMP_Text>(canvas, "SymbolDisplay");
         puzzle.letterDisplay = FindUIElement<TMP_Text>(canvas, "LetterDisplay");
-        puzzle.outerRingButton = FindUIElement<Button>(canvas, "OuterRingButton");
-        puzzle.innerRingButton = FindUIElement<Button>(canvas, "InnerRingButton");
+        puzzle.symbolButton = FindUIElement<Button>(canvas, "SymbolButton");
+        puzzle.letterButton = FindUIElement<Button>(canvas, "LetterButton");
+        puzzle.testMatchButton = FindUIElement<Button>(canvas, "TestMatchButton");
         puzzle.codeInputField = FindUIElement<TMP_InputField>(canvas, "CodeInputField");
         puzzle.submitButton = FindUIElement<Button>(canvas, "SubmitButton");
         puzzle.resetButton = FindUIElement<Button>(canvas, "ResetButton");
         puzzle.symbolSequenceDisplay = FindUIElement<TMP_Text>(canvas, "SequenceDisplay");
+        puzzle.discoveredMappingsDisplay = FindUIElement<TMP_Text>(canvas, "MappingsDisplay");
         puzzle.feedbackText = FindUIElement<TMP_Text>(canvas, "FeedbackText");
         puzzle.puzzleUI = canvas;
 

@@ -271,6 +271,19 @@ public class PuzzleTerminal : MonoBehaviour, IInteractable
                 Debug.Log($"Hiding puzzle UI for {puzzle.puzzleName}");
             }
         }
+        else if (linkedPuzzle is ShapeCipherPuzzle shapePuzzle)
+        {
+            if (isTerminalOpen)
+            {
+                shapePuzzle.ShowPuzzle();
+                Debug.Log($"Activating Shape Cipher Puzzle UI");
+            }
+            else
+            {
+                shapePuzzle.HidePuzzle();
+                Debug.Log($"Hiding Shape Cipher Puzzle UI");
+            }
+        }
 
         // Find and control player
         FindCurrentPlayer();

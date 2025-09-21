@@ -5,17 +5,20 @@ using System.Collections.Generic;
 
 public class CipherWheelPuzzle : BasePuzzle
 {
-    [Header("Cipher Wheel Settings")]
-    [Tooltip("Button to rotate the outer ring (symbols)")]
-    public Button outerRingButton;
+    [Header("Symbol-Letter Matching")]
+    [Tooltip("Button to cycle through symbols")]
+    public Button symbolButton;
     
-    [Tooltip("Button to rotate the inner ring (letters)")]
-    public Button innerRingButton;
+    [Tooltip("Button to cycle through letters")]
+    public Button letterButton;
     
-    [Tooltip("Display for current symbol")]
+    [Tooltip("Button to test if current symbol-letter combination is correct")]
+    public Button testMatchButton;
+    
+    [Tooltip("Display for current selected symbol")]
     public TMP_Text symbolDisplay;
     
-    [Tooltip("Display for current letter")]
+    [Tooltip("Display for current selected letter")]
     public TMP_Text letterDisplay;
     
     [Tooltip("Input field for the decoded password")]
@@ -24,7 +27,7 @@ public class CipherWheelPuzzle : BasePuzzle
     [Tooltip("Button to submit the decoded password")]
     public Button submitButton;
     
-    [Tooltip("Reset button to clear input")]
+    [Tooltip("Reset button to clear input and discovered mappings")]
     public Button resetButton;
 
     [Header("Puzzle Configuration")]
@@ -36,11 +39,23 @@ public class CipherWheelPuzzle : BasePuzzle
     
     [Tooltip("Display showing symbol sequences found in room")]
     public TMP_Text symbolSequenceDisplay;
+    
+    [Tooltip("Display showing discovered symbol-letter mappings")]
+    public TMP_Text discoveredMappingsDisplay;
 
-    private int outerRingPosition = 0;
-    private int innerRingPosition = 0;
+    private int currentSymbolIndex = 0;
+    private int currentLetterIndex = 0;
     private string[] symbols = {"△", "○", "□", "●", "◇", "▽", "◆", "⬟", "⬢"};
     private string[] letters = {"A", "B", "C", "D", "E", "F", "G", "H", "I"};
+    
+    // Correct symbol-letter mappings (△=C, ○=O, □=D, ●=E for "CODE")
+    private Dictionary<string, string> correctMappings = new Dictionary<string, string>
+    {
+        {"△", "C"}, {"○", "O"}, {"□", "D"}, {"●", "E"},
+        {"◇", "A"}, {"▽", "F"}, {"◆", "G"}, {"⬟", "H"}, {"⬢", "I"}
+    };
+    
+    private Dictionary<string, string> discoveredMappings = new Dictionary<string, string>();
     private int randomNumber;
 
     private void Start()
@@ -70,6 +85,7 @@ public class CipherWheelPuzzle : BasePuzzle
         SetupButtons();
         UpdateDisplay();
         UpdateSymbolSequenceDisplay();
+        UpdateDiscoveredMappingsDisplay();
     }
 
     // Test method to manually show the puzzle (can be called from inspector or other scripts)
@@ -81,24 +97,34 @@ public class CipherWheelPuzzle : BasePuzzle
 
     private void SetupButtons()
     {
-        if (outerRingButton != null)
+        if (symbolButton != null)
         {
-            outerRingButton.onClick.AddListener(RotateOuterRing);
-            Debug.Log("Outer ring button connected successfully");
+            symbolButton.onClick.AddListener(CycleSymbol);
+            Debug.Log("Symbol button connected successfully");
         }
         else
         {
-            Debug.LogError("Outer ring button is not assigned in the inspector!");
+            Debug.LogError("Symbol button is not assigned in the inspector!");
         }
             
-        if (innerRingButton != null)
+        if (letterButton != null)
         {
-            innerRingButton.onClick.AddListener(RotateInnerRing);
-            Debug.Log("Inner ring button connected successfully");
+            letterButton.onClick.AddListener(CycleLetter);
+            Debug.Log("Letter button connected successfully");
         }
         else
         {
-            Debug.LogError("Inner ring button is not assigned in the inspector!");
+            Debug.LogError("Letter button is not assigned in the inspector!");
+        }
+        
+        if (testMatchButton != null)
+        {
+            testMatchButton.onClick.AddListener(TestMatch);
+            Debug.Log("Test match button connected successfully");
+        }
+        else
+        {
+            Debug.LogError("Test match button is not assigned in the inspector!");
         }
             
         if (submitButton != null)
@@ -122,26 +148,51 @@ public class CipherWheelPuzzle : BasePuzzle
         }
     }
 
-    private void RotateOuterRing()
+    private void CycleSymbol()
     {
-        outerRingPosition = (outerRingPosition + 1) % symbols.Length;
+        currentSymbolIndex = (currentSymbolIndex + 1) % symbols.Length;
         UpdateDisplay();
-        GiveFeedback($"Outer ring position: {outerRingPosition + 1}");
+        GiveFeedback($"Selected symbol: {symbols[currentSymbolIndex]}");
     }
 
-    private void RotateInnerRing()
+    private void CycleLetter()
     {
-        innerRingPosition = (innerRingPosition + 1) % letters.Length;
+        currentLetterIndex = (currentLetterIndex + 1) % letters.Length;
         UpdateDisplay();
-        GiveFeedback($"Inner ring position: {innerRingPosition + 1}");
+        GiveFeedback($"Selected letter: {letters[currentLetterIndex]}");
+    }
+
+    private void TestMatch()
+    {
+        string currentSymbol = symbols[currentSymbolIndex];
+        string currentLetter = letters[currentLetterIndex];
+        
+        if (correctMappings.ContainsKey(currentSymbol) && correctMappings[currentSymbol] == currentLetter)
+        {
+            // Correct mapping found!
+            if (!discoveredMappings.ContainsKey(currentSymbol))
+            {
+                discoveredMappings[currentSymbol] = currentLetter;
+                GiveFeedback($"✅ MATCH! {currentSymbol} = {currentLetter}");
+                UpdateDiscoveredMappingsDisplay();
+            }
+            else
+            {
+                GiveFeedback($"✅ MATCH! {currentSymbol} = {currentLetter} (already discovered)");
+            }
+        }
+        else
+        {
+            GiveFeedback($"❌ NO MATCH: {currentSymbol} ≠ {currentLetter}");
+        }
     }
 
     private void UpdateDisplay()
     {
         if (symbolDisplay != null)
         {
-            symbolDisplay.text = symbols[outerRingPosition];
-            Debug.Log($"Updated symbol display to: {symbols[outerRingPosition]}");
+            symbolDisplay.text = symbols[currentSymbolIndex];
+            Debug.Log($"Updated symbol display to: {symbols[currentSymbolIndex]}");
         }
         else
         {
@@ -150,8 +201,8 @@ public class CipherWheelPuzzle : BasePuzzle
             
         if (letterDisplay != null)
         {
-            letterDisplay.text = letters[innerRingPosition];
-            Debug.Log($"Updated letter display to: {letters[innerRingPosition]}");
+            letterDisplay.text = letters[currentLetterIndex];
+            Debug.Log($"Updated letter display to: {letters[currentLetterIndex]}");
         }
         else
         {
@@ -172,11 +223,34 @@ public class CipherWheelPuzzle : BasePuzzle
         }
     }
 
+    private void UpdateDiscoveredMappingsDisplay()
+    {
+        if (discoveredMappingsDisplay != null)
+        {
+            string display = "Discovered Mappings:\n";
+            if (discoveredMappings.Count == 0)
+            {
+                display += "None discovered yet";
+            }
+            else
+            {
+                foreach (var mapping in discoveredMappings)
+                {
+                    display += $"{mapping.Key} = {mapping.Value}\n";
+                }
+            }
+            discoveredMappingsDisplay.text = display;
+        }
+    }
+
     private void ResetInput()
     {
         if (codeInputField != null)
             codeInputField.text = "";
-        GiveFeedback("Input cleared. Continue decoding.");
+        
+        discoveredMappings.Clear();
+        UpdateDiscoveredMappingsDisplay();
+        GiveFeedback("Input cleared and mappings reset. Start testing matches again.");
     }
 
     private void CheckPassword()
@@ -210,13 +284,15 @@ public class CipherWheelPuzzle : BasePuzzle
     public override void ResetPuzzle()
     {
         base.ResetPuzzle();
-        outerRingPosition = 0;
-        innerRingPosition = 0;
+        currentSymbolIndex = 0;
+        currentLetterIndex = 0;
+        discoveredMappings.Clear();
         
         if (codeInputField != null)
             codeInputField.text = "";
             
         UpdateDisplay();
+        UpdateDiscoveredMappingsDisplay();
     }
 
     public override void ShowPuzzle()
@@ -230,9 +306,15 @@ public class CipherWheelPuzzle : BasePuzzle
         }
     }
 
-    // Helper method to get current symbol-letter mapping
-    public string GetCurrentMapping()
+    // Helper method to get current symbol-letter selection
+    public string GetCurrentSelection()
     {
-        return $"{symbols[outerRingPosition]} → {letters[innerRingPosition]}";
+        return $"Testing: {symbols[currentSymbolIndex]} → {letters[currentLetterIndex]}";
+    }
+    
+    // Helper method to get discovered mappings count
+    public int GetDiscoveredMappingsCount()
+    {
+        return discoveredMappings.Count;
     }
 }

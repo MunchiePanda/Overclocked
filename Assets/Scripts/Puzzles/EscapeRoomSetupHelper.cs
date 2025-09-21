@@ -568,23 +568,27 @@ public class EscapeRoomSetupHelper : MonoBehaviour
         // Create UI elements
         GameObject symbolDisplay = CreateText(panel.transform, "SymbolDisplay", "△");
         GameObject letterDisplay = CreateText(panel.transform, "LetterDisplay", "A");
-        GameObject outerBtn = CreateButton(panel.transform, "OuterRingButton", "Rotate Symbols");
-        GameObject innerBtn = CreateButton(panel.transform, "InnerRingButton", "Rotate Letters");
+        GameObject symbolBtn = CreateButton(panel.transform, "SymbolButton", "Next Symbol");
+        GameObject letterBtn = CreateButton(panel.transform, "LetterButton", "Next Letter");
+        GameObject testBtn = CreateButton(panel.transform, "TestMatchButton", "Test Match");
         GameObject inputField = CreateInputField(panel.transform, "CodeInputField", "Enter decoded password");
         GameObject submitBtn = CreateButton(panel.transform, "SubmitButton", "Submit");
         GameObject resetBtn = CreateButton(panel.transform, "ResetButton", "Reset");
         GameObject sequenceDisplay = CreateText(panel.transform, "SequenceDisplay", "Find symbol sequences around the room");
+        GameObject mappingsDisplay = CreateText(panel.transform, "MappingsDisplay", "No mappings discovered yet");
         GameObject feedback = CreateText(panel.transform, "FeedbackText", "");
         
         // Position elements
-        PositionText(symbolDisplay, new Vector2(-150, 100));
-        PositionText(letterDisplay, new Vector2(150, 100));
-        PositionButton(outerBtn, new Vector2(-150, 50));
-        PositionButton(innerBtn, new Vector2(150, 50));
+        PositionText(symbolDisplay, new Vector2(-200, 120));
+        PositionText(letterDisplay, new Vector2(200, 120));
+        PositionButton(symbolBtn, new Vector2(-200, 80));
+        PositionButton(letterBtn, new Vector2(200, 80));
+        PositionButton(testBtn, new Vector2(0, 40));
         PositionInputField(inputField, new Vector2(0, 0));
-        PositionButton(submitBtn, new Vector2(-50, -50));
-        PositionButton(resetBtn, new Vector2(50, -50));
-        PositionText(sequenceDisplay, new Vector2(0, -100));
+        PositionButton(submitBtn, new Vector2(-80, -40));
+        PositionButton(resetBtn, new Vector2(80, -40));
+        PositionText(sequenceDisplay, new Vector2(-150, -80));
+        PositionText(mappingsDisplay, new Vector2(150, -80));
         PositionText(feedback, new Vector2(0, -150));
         
         // Connect references
@@ -592,12 +596,14 @@ public class EscapeRoomSetupHelper : MonoBehaviour
         puzzle.puzzleUI = canvas;
         puzzle.symbolDisplay = symbolDisplay.GetComponent<TMP_Text>();
         puzzle.letterDisplay = letterDisplay.GetComponent<TMP_Text>();
-        puzzle.outerRingButton = outerBtn.GetComponent<Button>();
-        puzzle.innerRingButton = innerBtn.GetComponent<Button>();
+        puzzle.symbolButton = symbolBtn.GetComponent<Button>();
+        puzzle.letterButton = letterBtn.GetComponent<Button>();
+        puzzle.testMatchButton = testBtn.GetComponent<Button>();
         puzzle.codeInputField = inputField.GetComponent<TMP_InputField>();
         puzzle.submitButton = submitBtn.GetComponent<Button>();
         puzzle.resetButton = resetBtn.GetComponent<Button>();
         puzzle.symbolSequenceDisplay = sequenceDisplay.GetComponent<TMP_Text>();
+        puzzle.discoveredMappingsDisplay = mappingsDisplay.GetComponent<TMP_Text>();
         puzzle.feedbackText = feedback.GetComponent<TMP_Text>();
         
         canvas.SetActive(false);

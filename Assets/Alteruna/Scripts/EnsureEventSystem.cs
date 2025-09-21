@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using Object = UnityEngine.Object;
 #if ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
@@ -30,7 +30,7 @@ namespace Alteruna
 			}
 			
 			// Check if there is already an EventSystem in the scene
-			if (Object.FindObjectOfType<EventSystem>() == null)
+			if (Object.FindFirstObjectByType<EventSystem>() == null)
 			{
 				// Create a new GameObject
 				GameObject eventSystem = new GameObject("EventSystem");

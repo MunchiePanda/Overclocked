@@ -257,6 +257,21 @@ public class PuzzleTerminal : MonoBehaviour, IInteractable
         else if (terminalPanel != null)
             terminalPanel.SetActive(isTerminalOpen);
 
+        // Activate linked puzzle UI
+        if (linkedPuzzle is BasePuzzle puzzle)
+        {
+            if (isTerminalOpen)
+            {
+                puzzle.ShowPuzzle();
+                Debug.Log($"Activating puzzle UI for {puzzle.puzzleName}");
+            }
+            else
+            {
+                puzzle.HidePuzzle();
+                Debug.Log($"Hiding puzzle UI for {puzzle.puzzleName}");
+            }
+        }
+
         // Find and control player
         FindCurrentPlayer();
         
@@ -281,7 +296,7 @@ public class PuzzleTerminal : MonoBehaviour, IInteractable
         // Update light
         if (terminalLight != null)
         {
-            bool puzzleIsSolved = linkedPuzzle is IPuzzle puzzle && puzzle.IsSolved();
+            bool puzzleIsSolved = linkedPuzzle is IPuzzle iPuzzle && iPuzzle.IsSolved();
             terminalLight.enabled = isTerminalOpen || isPlayerNearby || puzzleIsSolved;
         }
     }

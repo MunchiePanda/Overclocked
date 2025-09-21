@@ -45,7 +45,7 @@ public class UIConnectionHelper : MonoBehaviour
         Debug.Log("🔧 Fixing Cipher Wheel button connections...");
 
         // Find the puzzle and UI components
-        CipherWheelPuzzle puzzle = FindObjectOfType<CipherWheelPuzzle>();
+        CipherWheelPuzzle puzzle = FindFirstObjectByType<CipherWheelPuzzle>();
         if (puzzle == null)
         {
             Debug.LogError("❌ CipherWheelPuzzle not found! Create the puzzle first.");
@@ -91,7 +91,7 @@ public class UIConnectionHelper : MonoBehaviour
     {
         Debug.Log("🔧 Fixing Shadow Logic slider connections...");
 
-        ShadowLogicPuzzle puzzle = FindObjectOfType<ShadowLogicPuzzle>();
+        ShadowLogicPuzzle puzzle = FindFirstObjectByType<ShadowLogicPuzzle>();
         if (puzzle == null)
         {
             Debug.LogError("❌ ShadowLogicPuzzle not found!");
@@ -123,7 +123,7 @@ public class UIConnectionHelper : MonoBehaviour
     {
         Debug.Log("🔧 Fixing Frequency Resonance controls...");
 
-        FrequencyResonancePuzzle puzzle = FindObjectOfType<FrequencyResonancePuzzle>();
+        FrequencyResonancePuzzle puzzle = FindFirstObjectByType<FrequencyResonancePuzzle>();
         if (puzzle == null)
         {
             Debug.LogError("❌ FrequencyResonancePuzzle not found! Create it first using SetUpHelper.");

@@ -54,7 +54,7 @@ public class SafeStartScreenCreator : MonoBehaviour
 
     private void CreateEventSystem()
     {
-        if (FindObjectOfType<UnityEngine.EventSystems.EventSystem>() != null)
+        if (FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() != null)
         {
             Debug.Log("⚠️ EventSystem already exists");
             return;
@@ -70,7 +70,7 @@ public class SafeStartScreenCreator : MonoBehaviour
     private GameObject CreateCanvas()
     {
         // Check if Canvas already exists
-        Canvas existingCanvas = FindObjectOfType<Canvas>();
+        Canvas existingCanvas = FindFirstObjectByType<Canvas>();
         if (existingCanvas != null)
         {
             Debug.Log("⚠️ Canvas already exists, using existing one");
@@ -157,7 +157,7 @@ public class SafeStartScreenCreator : MonoBehaviour
 
     private void CreateGameSceneManager()
     {
-        if (FindObjectOfType<GameSceneManager>() != null)
+        if (FindFirstObjectByType<GameSceneManager>() != null)
         {
             Debug.Log("⚠️ GameSceneManager already exists");
             return;

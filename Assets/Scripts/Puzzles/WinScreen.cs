@@ -107,7 +107,7 @@ public class WinScreen : MonoBehaviour
         }
 
         // Get escape code manager info
-        EscapeCodeManager escapeManager = FindObjectOfType<EscapeCodeManager>();
+        EscapeCodeManager escapeManager = FindFirstObjectByType<EscapeCodeManager>();
         if (escapeManager != null)
         {
             // Update collected numbers

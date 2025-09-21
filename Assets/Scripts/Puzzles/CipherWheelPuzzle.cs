@@ -43,6 +43,25 @@ public class CipherWheelPuzzle : BasePuzzle
     private string[] letters = {"A", "B", "C", "D", "E", "F", "G", "H", "I"};
     private int randomNumber;
 
+    private void Start()
+    {
+        Initialize();
+        
+        // Make sure the puzzle UI reference is set
+        if (puzzleUI == null)
+        {
+            puzzleUI = GameObject.Find("CipherWheelCanvas");
+            if (puzzleUI != null)
+            {
+                Debug.Log("Found and assigned CipherWheelCanvas as puzzleUI");
+            }
+            else
+            {
+                Debug.LogError("Could not find CipherWheelCanvas!");
+            }
+        }
+    }
+
     public override void Initialize()
     {
         base.Initialize();
@@ -53,19 +72,54 @@ public class CipherWheelPuzzle : BasePuzzle
         UpdateSymbolSequenceDisplay();
     }
 
+    // Test method to manually show the puzzle (can be called from inspector or other scripts)
+    [ContextMenu("Test Show Puzzle")]
+    public void TestShowPuzzle()
+    {
+        ShowPuzzle();
+    }
+
     private void SetupButtons()
     {
         if (outerRingButton != null)
+        {
             outerRingButton.onClick.AddListener(RotateOuterRing);
+            Debug.Log("Outer ring button connected successfully");
+        }
+        else
+        {
+            Debug.LogError("Outer ring button is not assigned in the inspector!");
+        }
             
         if (innerRingButton != null)
+        {
             innerRingButton.onClick.AddListener(RotateInnerRing);
+            Debug.Log("Inner ring button connected successfully");
+        }
+        else
+        {
+            Debug.LogError("Inner ring button is not assigned in the inspector!");
+        }
             
         if (submitButton != null)
+        {
             submitButton.onClick.AddListener(CheckPassword);
+            Debug.Log("Submit button connected successfully");
+        }
+        else
+        {
+            Debug.LogError("Submit button is not assigned in the inspector!");
+        }
             
         if (resetButton != null)
+        {
             resetButton.onClick.AddListener(ResetInput);
+            Debug.Log("Reset button connected successfully");
+        }
+        else
+        {
+            Debug.LogError("Reset button is not assigned in the inspector!");
+        }
     }
 
     private void RotateOuterRing()
@@ -85,10 +139,24 @@ public class CipherWheelPuzzle : BasePuzzle
     private void UpdateDisplay()
     {
         if (symbolDisplay != null)
+        {
             symbolDisplay.text = symbols[outerRingPosition];
+            Debug.Log($"Updated symbol display to: {symbols[outerRingPosition]}");
+        }
+        else
+        {
+            Debug.LogError("Symbol display is not assigned in the inspector!");
+        }
             
         if (letterDisplay != null)
+        {
             letterDisplay.text = letters[innerRingPosition];
+            Debug.Log($"Updated letter display to: {letters[innerRingPosition]}");
+        }
+        else
+        {
+            Debug.LogError("Letter display is not assigned in the inspector!");
+        }
     }
 
     private void UpdateSymbolSequenceDisplay()
@@ -129,7 +197,7 @@ public class CipherWheelPuzzle : BasePuzzle
             CompletePuzzle();
             
             // Notify the escape code manager
-            EscapeCodeManager escapeManager = FindObjectOfType<EscapeCodeManager>();
+            EscapeCodeManager escapeManager = FindFirstObjectByType<EscapeCodeManager>();
             if (escapeManager != null)
                 escapeManager.OnPuzzleCompleted(randomNumber);
         }

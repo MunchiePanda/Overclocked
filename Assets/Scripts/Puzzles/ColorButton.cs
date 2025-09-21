@@ -1,198 +1,119 @@
 using UnityEngine;
 using System.Collections;
 
-/// <summary>
-/// Individual color button with light that can be clicked for sequence puzzles
-/// </summary>
 public class ColorButton : MonoBehaviour, IInteractable
 {
     [Header("Button Configuration")]
     [Tooltip("The color this button represents")]
     public ColorType buttonColor = ColorType.Red;
     
-    [Tooltip("Light component for this button")]
-    public Light buttonLight;
-    
-    [Tooltip("Renderer for button material (optional visual feedback)")]
-    public Renderer buttonRenderer;
-    
-    [Tooltip("Material index to change color on (if using renderer)")]
-    public int materialIndex = 0;
+    [Tooltip("The parent puzzle that manages this button")]
+    public ColorLightPuzzle parentPuzzle;
 
-    [Header("Light Settings")]
-    [Tooltip("Default light intensity")]
-    public float defaultIntensity = 1f;
-    
-    [Tooltip("Pulse intensity when pressed")]
-    public float pulseIntensity = 3f;
-    
-    [Tooltip("Duration of pulse effect")]
-    public float pulseDuration = 0.3f;
-    
-    [Tooltip("Range of the light")]
-    public float lightRange = 5f;
-
-    [Header("Interaction Settings")]
-    [Tooltip("Hover prompt text")]
-    public string hoverText = "Press Color Button";
-    
-    [Tooltip("Sound effect when button is pressed (optional)")]
-    public AudioSource audioSource;
-
-    private ColorLightPuzzle parentPuzzle;
-    private Color defaultLightColor;
-    private bool isPulsing = false;
-    private bool isInteractionEnabled = true;
-
+    // Property for backward compatibility
     public ColorType ButtonColor => buttonColor;
 
-    private void Start()
+    [Header("Visual Components")]
+    [Tooltip("Light component that shows the button color")]
+    public Light buttonLight;
+    
+    [Tooltip("Renderer for the button material")]
+    public Renderer buttonRenderer;
+    
+    [Tooltip("Material index to change")]
+    public int materialIndex = 0;
+
+    [Header("Interaction Settings")]
+    [Tooltip("Can the button be pressed?")]
+    public bool isInteractionEnabled = true;
+    
+    [Tooltip("Text shown when hovering")]
+    public string hoverText = "Press Color Button";
+
+    [Header("Audio")]
+    [Tooltip("Audio source for button press sound")]
+    public AudioSource audioSource;
+
+    [Header("Visual Feedback")]
+    [Tooltip("How long to pulse when pressed")]
+    public float pulseLength = 0.5f;
+    
+    [Tooltip("Pulse intensity multiplier")]
+    public float pulseIntensity = 3f;
+
+    private Color buttonColorValue;
+    private float defaultIntensity = 1f;
+    private bool isPulsing = false;
+    private Material originalMaterial;
+
+    void Start()
     {
-        SetupButton();
+        InitializeButton();
     }
 
-    private void SetupButton()
+    void InitializeButton()
     {
-        // Auto-find light component if not assigned
-        if (buttonLight == null)
+        buttonColorValue = GetColorFromType(buttonColor);
+
+        if (buttonLight != null)
         {
-            buttonLight = GetComponentInChildren<Light>();
-            if (buttonLight == null)
-            {
-                // Create light component
-                GameObject lightObj = new GameObject("ButtonLight");
-                lightObj.transform.SetParent(transform);
-                lightObj.transform.localPosition = Vector3.up * 0.5f;
-                
-                buttonLight = lightObj.AddComponent<Light>();
-                buttonLight.type = LightType.Point;
-                buttonLight.range = lightRange;
-                buttonLight.intensity = defaultIntensity;
-            }
+            buttonLight.color = buttonColorValue;
+            defaultIntensity = buttonLight.intensity;
         }
 
-        // Set default color based on button color type
-        defaultLightColor = GetColorFromType(buttonColor);
-        SetLightToDefaultColor();
-
-        // Setup audio if available
-        if (audioSource == null)
+        if (buttonRenderer != null && buttonRenderer.materials.Length > materialIndex)
         {
-            audioSource = GetComponent<AudioSource>();
+            originalMaterial = new Material(buttonRenderer.materials[materialIndex]);
+            
+            Material[] materials = buttonRenderer.materials;
+            materials[materialIndex].color = buttonColorValue;
+            materials[materialIndex].EnableKeyword("_EMISSION");
+            materials[materialIndex].SetColor("_EmissionColor", buttonColorValue * 0.5f);
+            
+            buttonRenderer.materials = materials;
         }
 
-        // Make sure we have a collider for interaction
         if (GetComponent<Collider>() == null)
         {
             gameObject.AddComponent<BoxCollider>();
         }
+
+        if (parentPuzzle == null)
+        {
+            parentPuzzle = FindFirstObjectByType<ColorLightPuzzle>();
+        }
     }
 
-    public void Initialize(ColorLightPuzzle puzzle)
+    public void Initialize(ColorType color, ColorLightPuzzle puzzle)
     {
+        buttonColor = color;
         parentPuzzle = puzzle;
-        SetupButton();
+        InitializeButton();
     }
 
     public void SetLightToDefaultColor()
     {
         if (buttonLight != null)
         {
-            buttonLight.color = defaultLightColor;
+            buttonLight.color = buttonColorValue;
             buttonLight.intensity = defaultIntensity;
         }
-
-        // Update material color if using renderer
-        if (buttonRenderer != null && buttonRenderer.materials.Length > materialIndex)
-        {
-            Material[] materials = buttonRenderer.materials;
-            materials[materialIndex].color = defaultLightColor;
-            materials[materialIndex].SetColor("_EmissionColor", defaultLightColor * 0.5f);
-            buttonRenderer.materials = materials;
-        }
-    }
-
-    public void FlashColor(Color flashColor, float duration)
-    {
-        StartCoroutine(FlashRoutine(flashColor, duration));
     }
 
     public void PulseLight()
     {
-        if (!isPulsing)
-        {
-            StartCoroutine(PulseRoutine());
-        }
+        PulseButtonColor();
     }
 
-    private IEnumerator FlashRoutine(Color flashColor, float duration)
+    public void FlashColor(Color color)
     {
-        Color originalColor = buttonLight.color;
-        float originalIntensity = buttonLight.intensity;
-
-        // Flash to new color
-        buttonLight.color = flashColor;
-        buttonLight.intensity = pulseIntensity;
-
-        yield return new WaitForSeconds(duration);
-
-        // Return to default
-        SetLightToDefaultColor();
+        StartCoroutine(FlashCoroutine(color, 0.2f, 3));
     }
 
-    private IEnumerator PulseRoutine()
-    {
-        isPulsing = true;
-        
-        float originalIntensity = buttonLight.intensity;
-        float elapsed = 0f;
-
-        // Pulse up
-        while (elapsed < pulseDuration / 2)
-        {
-            elapsed += Time.deltaTime;
-            float progress = elapsed / (pulseDuration / 2);
-            buttonLight.intensity = Mathf.Lerp(originalIntensity, pulseIntensity, progress);
-            yield return null;
-        }
-
-        // Pulse down
-        elapsed = 0f;
-        while (elapsed < pulseDuration / 2)
-        {
-            elapsed += Time.deltaTime;
-            float progress = elapsed / (pulseDuration / 2);
-            buttonLight.intensity = Mathf.Lerp(pulseIntensity, originalIntensity, progress);
-            yield return null;
-        }
-
-        buttonLight.intensity = originalIntensity;
-        isPulsing = false;
-    }
-
-    private Color GetColorFromType(ColorType colorType)
-    {
-        return colorType switch
-        {
-            ColorType.Red => Color.red,
-            ColorType.Blue => Color.blue,
-            ColorType.Green => Color.green,
-            ColorType.Yellow => Color.yellow,
-            ColorType.Purple => new Color(0.8f, 0f, 0.8f), // Purple/Magenta
-            ColorType.Orange => new Color(1f, 0.5f, 0f),   // Orange
-            ColorType.Cyan => Color.cyan,
-            ColorType.White => Color.white,
-            _ => Color.white
-        };
-    }
-
-    // IInteractable implementation
-    // IInteractable interface implementation  
     public void OnHover()
     {
         if (isInteractionEnabled)
         {
-            // Optional: Add subtle glow or highlight
             if (buttonLight != null && !isPulsing)
             {
                 buttonLight.intensity = defaultIntensity * 1.2f;
@@ -204,7 +125,6 @@ public class ColorButton : MonoBehaviour, IInteractable
     {
         if (isInteractionEnabled && !isPulsing)
         {
-            // Remove highlight
             if (buttonLight != null)
             {
                 buttonLight.intensity = defaultIntensity;
@@ -216,59 +136,133 @@ public class ColorButton : MonoBehaviour, IInteractable
     {
         if (isInteractionEnabled && parentPuzzle != null)
         {
-            // Play sound effect
             if (audioSource != null && audioSource.clip != null)
             {
                 audioSource.Play();
             }
 
-            // Notify parent puzzle
             parentPuzzle.OnColorButtonPressed(buttonColor);
         }
+    }
+
+    public void PulseCorrect()
+    {
+        StartCoroutine(PulseCoroutine(Color.green));
+    }
+
+    public void PulseIncorrect()
+    {
+        StartCoroutine(PulseCoroutine(Color.red));
+    }
+
+    public void PulseButtonColor()
+    {
+        StartCoroutine(PulseCoroutine(buttonColorValue));
+    }
+
+    private IEnumerator PulseCoroutine(Color pulseColor)
+    {
+        isPulsing = true;
+        float originalLightIntensity = buttonLight != null ? buttonLight.intensity : defaultIntensity;
+        Color originalLightColor = buttonLight != null ? buttonLight.color : buttonColorValue;
+
+        float timer = 0f;
+        while (timer < pulseLength)
+        {
+            timer += Time.deltaTime;
+            float progress = timer / pulseLength;
+            float intensity = Mathf.Lerp(originalLightIntensity, originalLightIntensity * pulseIntensity, Mathf.Sin(progress * Mathf.PI * 4));
+
+            if (buttonLight != null)
+            {
+                buttonLight.intensity = intensity;
+                buttonLight.color = Color.Lerp(originalLightColor, pulseColor, Mathf.Sin(progress * Mathf.PI * 2) * 0.5f);
+            }
+
+            yield return null;
+        }
+
+        if (buttonLight != null)
+        {
+            buttonLight.intensity = originalLightIntensity;
+            buttonLight.color = originalLightColor;
+        }
+
+        isPulsing = false;
+    }
+
+    public void FlashSuccess()
+    {
+        StartCoroutine(FlashCoroutine(Color.green, 0.3f, 3));
+    }
+
+    public void FlashFailure()
+    {
+        StartCoroutine(FlashCoroutine(Color.red, 0.2f, 5));
+    }
+
+    private IEnumerator FlashCoroutine(Color flashColor, float flashInterval, int flashCount)
+    {
+        isPulsing = true;
+        Color originalColor = buttonLight != null ? buttonLight.color : buttonColorValue;
+
+        for (int i = 0; i < flashCount; i++)
+        {
+            if (buttonLight != null)
+                buttonLight.color = flashColor;
+            
+            yield return new WaitForSeconds(flashInterval);
+            
+            if (buttonLight != null)
+                buttonLight.color = originalColor;
+            
+            yield return new WaitForSeconds(flashInterval);
+        }
+
+        isPulsing = false;
     }
 
     public void SetInteractionEnabled(bool enabled)
     {
         isInteractionEnabled = enabled;
+        
+        if (buttonLight != null)
+        {
+            buttonLight.intensity = enabled ? defaultIntensity : defaultIntensity * 0.3f;
+        }
     }
 
-    // Debug methods
-    [ContextMenu("🔍 Test Button Press")]
-    private void TestButtonPress()
+    private Color GetColorFromType(ColorType colorType)
+    {
+        return colorType switch
+        {
+            ColorType.Red => Color.red,
+            ColorType.Blue => Color.blue,
+            ColorType.Green => Color.green,
+            ColorType.Yellow => Color.yellow,
+            ColorType.Purple => new Color(0.8f, 0f, 0.8f),
+            ColorType.Orange => new Color(1f, 0.5f, 0f),
+            ColorType.Cyan => Color.cyan,
+            ColorType.White => Color.white,
+            _ => Color.white
+        };
+    }
+
+    [ContextMenu("🎨 Test Button Press")]
+    private void DebugTestPress()
     {
         OnInteract();
     }
 
-    [ContextMenu("💡 Test Light Pulse")]
-    private void TestLightPulse()
+    [ContextMenu("✅ Test Success Pulse")]
+    private void DebugTestSuccess()
     {
-        PulseLight();
+        PulseCorrect();
     }
 
-    [ContextMenu("⚡ Test Flash Red")]
-    private void TestFlashRed()
+    [ContextMenu("❌ Test Failure Pulse")]
+    private void DebugTestFailure()
     {
-        FlashColor(Color.red, 1f);
+        PulseIncorrect();
     }
-
-    [ContextMenu("⚡ Test Flash Green")]
-    private void TestFlashGreen()
-    {
-        FlashColor(Color.green, 1f);
-    }
-}
-
-/// <summary>
-/// Enum for different color types available
-/// </summary>
-public enum ColorType
-{
-    Red,
-    Blue, 
-    Green,
-    Yellow,
-    Purple,
-    Orange,
-    Cyan,
-    White
 }

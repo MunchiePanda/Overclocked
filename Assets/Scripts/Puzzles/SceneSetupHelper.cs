@@ -31,7 +31,7 @@ public class SceneSetupHelper : MonoBehaviour
         Debug.Log("🌟 Setting up escape room system in new scene...");
 
         // Check if SetUpHelper already exists
-        if (FindObjectOfType<EscapeRoomSetupHelper>() != null)
+        if (FindFirstObjectByType<EscapeRoomSetupHelper>() != null)
         {
             Debug.LogWarning("⚠️ EscapeRoomSetupHelper already exists in this scene!");
             return;
@@ -44,14 +44,14 @@ public class SceneSetupHelper : MonoBehaviour
         Debug.Log("✅ Created SetUpHelper GameObject");
 
         // Create basic Canvas if none exists
-        Canvas existingCanvas = FindObjectOfType<Canvas>();
+        Canvas existingCanvas = FindFirstObjectByType<Canvas>();
         if (existingCanvas == null)
         {
             CreateBasicCanvas();
         }
 
         // Create EventSystem if none exists
-        UnityEngine.EventSystems.EventSystem eventSystem = FindObjectOfType<UnityEngine.EventSystems.EventSystem>();
+        UnityEngine.EventSystems.EventSystem eventSystem = FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>();
         if (eventSystem == null)
         {
             CreateEventSystem();

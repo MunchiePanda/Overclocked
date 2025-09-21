@@ -103,7 +103,7 @@ public class EnvironmentalColorClueFixed : MonoBehaviour, IInteractable
             colorRenderer.materials = materials;
         }
 
-        ColorLightPuzzle puzzle = FindObjectOfType<ColorLightPuzzle>();
+        ColorLightPuzzle puzzle = FindFirstObjectByType<ColorLightPuzzle>();
         if (puzzle != null)
         {
             puzzle.ProvideFeedback($"Discovered: {clueDescription}");
@@ -118,7 +118,7 @@ public class EnvironmentalColorClueFixed : MonoBehaviour, IInteractable
         feedback += $"Color: {clueColor}\n";
         feedback += $"Position hint: This appears to be element #{sequencePosition + 1} in a sequence.";
 
-        ColorLightPuzzle puzzle = FindObjectOfType<ColorLightPuzzle>();
+        ColorLightPuzzle puzzle = FindFirstObjectByType<ColorLightPuzzle>();
         if (puzzle != null)
         {
             puzzle.ProvideFeedback(feedback);

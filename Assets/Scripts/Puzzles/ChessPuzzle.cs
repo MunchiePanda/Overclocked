@@ -305,7 +305,7 @@ public class ChessPuzzle : BasePuzzle
             CompletePuzzle();
             
             // Notify escape code manager
-            EscapeCodeManager escapeManager = FindObjectOfType<EscapeCodeManager>();
+            EscapeCodeManager escapeManager = FindFirstObjectByType<EscapeCodeManager>();
             if (escapeManager != null)
                 escapeManager.OnPuzzleCompleted(randomNumber);
         }

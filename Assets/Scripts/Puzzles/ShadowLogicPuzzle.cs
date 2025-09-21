@@ -322,7 +322,7 @@ public class ShadowLogicPuzzle : BasePuzzle
         CompletePuzzle();
 
         // Notify the escape code manager
-        EscapeCodeManager escapeManager = FindObjectOfType<EscapeCodeManager>();
+        EscapeCodeManager escapeManager = FindFirstObjectByType<EscapeCodeManager>();
         if (escapeManager != null)
             escapeManager.OnPuzzleCompleted(randomNumber);
     }

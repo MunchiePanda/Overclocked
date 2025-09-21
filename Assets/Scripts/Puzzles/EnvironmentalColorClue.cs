@@ -139,7 +139,7 @@ public class EnvironmentalColorClue : MonoBehaviour, IInteractable
         }
 
         // Notify the color light puzzle about discovery
-        ColorLightPuzzle puzzle = FindObjectOfType<ColorLightPuzzle>();
+        ColorLightPuzzle puzzle = FindFirstObjectByType<ColorLightPuzzle>();
         if (puzzle != null)
         {
             puzzle.ProvideFeedback($"Discovered: {clueDescription}");
@@ -156,7 +156,7 @@ public class EnvironmentalColorClue : MonoBehaviour, IInteractable
         feedback += $"Position hint: This appears to be element #{sequencePosition + 1} in a sequence.";
 
         // Find puzzle and give feedback
-        ColorLightPuzzle puzzle = FindObjectOfType<ColorLightPuzzle>();
+        ColorLightPuzzle puzzle = FindFirstObjectByType<ColorLightPuzzle>();
         if (puzzle != null)
         {
             puzzle.ProvideFeedback(feedback);

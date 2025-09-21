@@ -54,6 +54,15 @@ public abstract class BasePuzzle : MonoBehaviour
         if (puzzleUI != null)
         {
             puzzleUI.SetActive(true);
+            
+            // Fix scale if it's zero (common issue with UI canvases)
+            Transform puzzleTransform = puzzleUI.transform;
+            if (puzzleTransform.localScale == Vector3.zero)
+            {
+                puzzleTransform.localScale = Vector3.one;
+                Debug.Log($"Fixed zero scale for puzzle UI: {puzzleName}");
+            }
+            
             Debug.Log("Showing puzzle: " + puzzleName);
         }
 

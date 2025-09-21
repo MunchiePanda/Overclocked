@@ -78,7 +78,7 @@ public class ColorLightPuzzle : BasePuzzle
         {
             if (colorButtons[i] != null)
             {
-                colorButtons[i].Initialize(this);
+                colorButtons[i].Initialize(colorButtons[i].buttonColor, this);
             }
         }
     }
@@ -190,7 +190,7 @@ public class ColorLightPuzzle : BasePuzzle
         {
             if (button != null)
             {
-                button.FlashColor(successColor, flashDuration);
+                button.FlashSuccess();
             }
         }
 
@@ -202,7 +202,7 @@ public class ColorLightPuzzle : BasePuzzle
         CompletePuzzle();
         
         // Notify escape code manager
-        EscapeCodeManager escapeManager = FindObjectOfType<EscapeCodeManager>();
+        EscapeCodeManager escapeManager = FindFirstObjectByType<EscapeCodeManager>();
         if (escapeManager != null)
         {
             escapeManager.OnPuzzleCompleted(randomNumber);
@@ -221,7 +221,7 @@ public class ColorLightPuzzle : BasePuzzle
         {
             if (button != null)
             {
-                button.FlashColor(failureColor, flashDuration);
+                button.FlashFailure();
             }
         }
 

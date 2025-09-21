@@ -243,11 +243,11 @@ public class ColorLightPuzzleSetup : MonoBehaviour
     private void AssignPuzzleReferences(ColorLightPuzzle puzzle)
     {
         // Find all color buttons
-        ColorButton[] buttons = FindObjectsOfType<ColorButton>();
+        ColorButton[] buttons = FindObjectsByType<ColorButton>(FindObjectsSortMode.None);
         puzzle.colorButtons = buttons;
 
         // Setup environmental clues
-        EnvironmentalColorClue[] clues = FindObjectsOfType<EnvironmentalColorClue>();
+        EnvironmentalColorClue[] clues = FindObjectsByType<EnvironmentalColorClue>(FindObjectsSortMode.None);
         
         puzzle.environmentalClues = new ColorLightPuzzle.EnvironmentalClue[clues.Length];
         for (int i = 0; i < clues.Length; i++)
@@ -270,7 +270,7 @@ public class ColorLightPuzzleSetup : MonoBehaviour
     [ContextMenu("🎯 Test Button Sequence")]
     public void TestButtonSequence()
     {
-        ColorButton[] buttons = FindObjectsOfType<ColorButton>();
+        ColorButton[] buttons = FindObjectsByType<ColorButton>(FindObjectsSortMode.None);
         
         Debug.Log("🎯 Testing button sequence...");
         foreach (ColorButton button in buttons)
@@ -282,7 +282,7 @@ public class ColorLightPuzzleSetup : MonoBehaviour
     [ContextMenu("🔍 List Environmental Clues")]
     public void ListEnvironmentalClues()
     {
-        EnvironmentalColorClue[] clues = FindObjectsOfType<EnvironmentalColorClue>();
+        EnvironmentalColorClue[] clues = FindObjectsByType<EnvironmentalColorClue>(FindObjectsSortMode.None);
         
         Debug.Log("🔍 Environmental clues found:");
         foreach (EnvironmentalColorClue clue in clues)

@@ -56,10 +56,10 @@ public class ColorLightTerminalIntegration : MonoBehaviour
     {
         // Auto-find components if not assigned
         if (aiTerminal == null)
-            aiTerminal = FindObjectOfType<InteractableAITerminalNew>();
+            aiTerminal = FindFirstObjectByType<InteractableAITerminalNew>();
             
         if (colorPuzzle == null)
-            colorPuzzle = FindObjectOfType<ColorLightPuzzle>();
+            colorPuzzle = FindFirstObjectByType<ColorLightPuzzle>();
 
         if (aiTerminal != null && colorPuzzle != null)
         {
@@ -134,7 +134,7 @@ public class ColorLightTerminalIntegration : MonoBehaviour
         string hint = "📊 SEQUENCE ANALYSIS\n\n";
         
         // Check discovered environmental clues
-        EnvironmentalColorClue[] clues = FindObjectsOfType<EnvironmentalColorClue>();
+        EnvironmentalColorClue[] clues = FindObjectsByType<EnvironmentalColorClue>(FindObjectsSortMode.None);
         
         hint += "Discovered color elements:\n";
         
@@ -219,7 +219,7 @@ public class ColorLightTerminalIntegration : MonoBehaviour
         if (!IsColorPuzzleActive())
             return "Color sequence system offline.";
 
-        EnvironmentalColorClue[] clues = FindObjectsOfType<EnvironmentalColorClue>();
+        EnvironmentalColorClue[] clues = FindObjectsByType<EnvironmentalColorClue>(FindObjectsSortMode.None);
         int discoveredClues = 0;
         
         foreach (var clue in clues)

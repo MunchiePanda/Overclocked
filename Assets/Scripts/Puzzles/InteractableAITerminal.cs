@@ -52,7 +52,7 @@ public class InteractableAITerminal : MonoBehaviour, IInteractable
 
         // Find terminal controller if not assigned
         if (terminalController == null)
-            terminalController = FindObjectOfType<TerminalControllerNew>();
+            terminalController = FindFirstObjectByType<TerminalControllerNew>();
 
         // Find player
         GameObject player = GameObject.FindGameObjectWithTag("Player");

@@ -461,6 +461,70 @@ public class SimpleRiddleSetup : MonoBehaviour
         UpdateStatus();
         Debug.Log("🗑️ Riddle puzzle removed");
     }
+    
+    [ContextMenu("Create Riddle Terminal")]
+    public void CreateRiddleTerminal()
+    {
+        Debug.Log("🖥️ Creating Riddle Terminal...");
+        
+        // Check if riddle puzzle exists
+        RiddlePuzzle riddlePuzzle = FindFirstObjectByType<RiddlePuzzle>();
+        if (riddlePuzzle == null)
+        {
+            Debug.LogWarning("⚠️ No RiddlePuzzle found. Create the riddle puzzle system first!");
+            return;
+        }
+        
+        // Check if terminal already exists
+        RiddleTerminal existingTerminal = FindFirstObjectByType<RiddleTerminal>();
+        if (existingTerminal != null)
+        {
+            Debug.LogWarning("⚠️ Riddle terminal already exists!");
+            return;
+        }
+        
+        try
+        {
+            // Create terminal using the setup helper
+            GameObject setupHelper = new GameObject("TerminalSetupHelper");
+            setupHelper.transform.position = transform.position + Vector3.forward * 5f;
+            
+            RiddleTerminalSetup terminalSetup = setupHelper.AddComponent<RiddleTerminalSetup>();
+            terminalSetup.terminalName = "Neural Interface Terminal";
+            terminalSetup.terminalPosition = setupHelper.transform.position;
+            terminalSetup.terminalMessage = "RIDDLE CHALLENGE TERMINAL\n\nPress E to access\nriddle challenges\n\nStatus: READY";
+            
+            // Create the terminal
+            terminalSetup.CreateRiddleTerminal();
+            
+            // Clean up helper
+            DestroyImmediate(setupHelper);
+            
+            Debug.Log("✅ Riddle terminal created successfully!");
+            Debug.Log("💡 Walk up to the terminal and press E to test the interaction.");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"❌ Error creating riddle terminal: {e.Message}");
+        }
+    }
+    
+    [ContextMenu("Test Terminal Interaction")]
+    public void TestTerminalInteraction()
+    {
+        RiddleTerminal terminal = FindFirstObjectByType<RiddleTerminal>();
+        if (terminal != null)
+        {
+            Debug.Log("🧪 Testing terminal interaction...");
+            terminal.OnHover();
+            terminal.OnInteract();
+            Debug.Log("✅ Terminal test completed. Check console for results.");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ No riddle terminal found. Create one first!");
+        }
+    }
 }
 
 [CustomEditor(typeof(SimpleRiddleSetup))]
@@ -480,12 +544,24 @@ public class SimpleRiddleSetupEditor : Editor
             setup.CreateRiddlePuzzleSystem();
         }
         
+        if (GUILayout.Button("🖥️ Create Riddle Terminal", GUILayout.Height(30)))
+        {
+            setup.CreateRiddleTerminal();
+        }
+        
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("🧪 Test Puzzle"))
         {
             setup.TestRiddlePuzzle();
         }
         
+        if (GUILayout.Button("🎮 Test Terminal"))
+        {
+            setup.TestTerminalInteraction();
+        }
+        EditorGUILayout.EndHorizontal();
+        
+        EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("🗑️ Remove Puzzle"))
         {
             if (EditorUtility.DisplayDialog("Remove Riddle Puzzle", 

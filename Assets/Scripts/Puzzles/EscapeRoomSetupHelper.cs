@@ -496,6 +496,7 @@ public class EscapeRoomSetupHelper : MonoBehaviour
         GameObject button1 = CreateButton(terminalPanel.transform, "Button1", "1. Cipher Wheel Puzzle");
         GameObject button2 = CreateButton(terminalPanel.transform, "Button2", "2. Frequency Resonance Puzzle");
         GameObject button3 = CreateButton(terminalPanel.transform, "Button3", "3. Shadow Logic Puzzle");
+        GameObject button4 = CreateButton(terminalPanel.transform, "Button4", "4. Riddle Challenge");
         GameObject closeBtn = CreateButton(terminalPanel.transform, "CloseButton", "Close");
         
         // Position elements
@@ -503,9 +504,10 @@ public class EscapeRoomSetupHelper : MonoBehaviour
         PositionText(instructions, new Vector2(0, 200));
         PositionText(hintText, new Vector2(0, 0));
         
-        PositionButton(button1, new Vector2(-200, 150));
-        PositionButton(button2, new Vector2(0, 150));
-        PositionButton(button3, new Vector2(200, 150));
+        PositionButton(button1, new Vector2(-300, 150));
+        PositionButton(button2, new Vector2(-100, 150));
+        PositionButton(button3, new Vector2(100, 150));
+        PositionButton(button4, new Vector2(300, 150));
         PositionButton(closeBtn, new Vector2(0, -250));
         
         // Set up hint text area
@@ -522,9 +524,11 @@ public class EscapeRoomSetupHelper : MonoBehaviour
         controller.button1 = button1.GetComponent<Button>();
         controller.button2 = button2.GetComponent<Button>();
         controller.button3 = button3.GetComponent<Button>();
+        controller.button4 = button4.GetComponent<Button>();
         controller.buttonText1 = button1.GetComponentInChildren<TMP_Text>();
         controller.buttonText2 = button2.GetComponentInChildren<TMP_Text>();
         controller.buttonText3 = button3.GetComponentInChildren<TMP_Text>();
+        controller.buttonText4 = button4.GetComponentInChildren<TMP_Text>();
         controller.closeButton = closeBtn.GetComponent<Button>();
         controller.terminalHeader = header.GetComponent<TMP_Text>();
         controller.instructionText = instructions.GetComponent<TMP_Text>();
@@ -859,6 +863,11 @@ public class EscapeRoomSetupHelper : MonoBehaviour
 
     private GameObject CreateText(Transform parent, string name, string text)
     {
+        return CreateText(parent, name, text, new Vector2(200, 30), Vector2.zero);
+    }
+
+    private GameObject CreateText(Transform parent, string name, string text, Vector2 size, Vector2 position)
+    {
         GameObject textObj = new GameObject(name);
         textObj.transform.SetParent(parent);
         textObj.AddComponent<CanvasRenderer>();
@@ -869,12 +878,18 @@ public class EscapeRoomSetupHelper : MonoBehaviour
         tmpText.color = Color.white;
         
         RectTransform rect = textObj.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(200, 30);
+        rect.sizeDelta = size;
+        rect.anchoredPosition = position;
         
         return textObj;
     }
 
     private GameObject CreateButton(Transform parent, string name, string text)
+    {
+        return CreateButton(parent, name, text, new Vector2(150, 40), Vector2.zero);
+    }
+
+    private GameObject CreateButton(Transform parent, string name, string text, Vector2 size, Vector2 position)
     {
         GameObject button = new GameObject(name);
         button.transform.SetParent(parent);
@@ -888,12 +903,18 @@ public class EscapeRoomSetupHelper : MonoBehaviour
         buttonText.GetComponent<TMP_Text>().color = Color.white;
         
         RectTransform rect = button.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(150, 40);
+        rect.sizeDelta = size;
+        rect.anchoredPosition = position;
         
         return button;
     }
 
     private GameObject CreateInputField(Transform parent, string name, string placeholder)
+    {
+        return CreateInputField(parent, name, placeholder, new Vector2(200, 30), Vector2.zero);
+    }
+
+    private GameObject CreateInputField(Transform parent, string name, string placeholder, Vector2 size, Vector2 position)
     {
         GameObject inputField = new GameObject(name);
         inputField.transform.SetParent(parent);
@@ -925,7 +946,8 @@ public class EscapeRoomSetupHelper : MonoBehaviour
         input.placeholder = placeholderText;
         
         RectTransform rect = inputField.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(200, 30);
+        rect.sizeDelta = size;
+        rect.anchoredPosition = position;
         
         return inputField;
     }
@@ -987,6 +1009,88 @@ public class EscapeRoomSetupHelper : MonoBehaviour
     {
         RectTransform rect = obj.GetComponent<RectTransform>();
         rect.anchoredPosition = position;
+    }
+
+    [ContextMenu("Setup Riddle Puzzle")]
+    public void SetupRiddlePuzzle()
+    {
+        Debug.Log("Setting up Riddle Puzzle UI and connections...");
+        
+        // Create main canvas
+        GameObject canvas = new GameObject("RiddleCanvas");
+        Canvas canvasComponent = canvas.AddComponent<Canvas>();
+        canvasComponent.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvasComponent.sortingOrder = 10;
+        
+        CanvasScaler scaler = canvas.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+        
+        canvas.AddComponent<GraphicRaycaster>();
+        canvas.SetActive(false);
+        
+        // Create main panel
+        GameObject mainPanel = CreateUIPanel(canvas.transform, "RiddlePanel", new Vector2(800, 600));
+        
+        // Create riddle display
+        GameObject riddleDisplay = CreateText(mainPanel.transform, "RiddleDisplay", 
+            "Click next/previous to browse riddles, then enter your answer below.",
+            new Vector2(700, 120), new Vector2(0, 200));
+        riddleDisplay.GetComponent<TMP_Text>().fontSize = 18;
+        
+        // Create navigation buttons
+        GameObject prevBtn = CreateButton(mainPanel.transform, "PreviousRiddleButton", "← Previous",
+            new Vector2(120, 40), new Vector2(-200, 100));
+        GameObject nextBtn = CreateButton(mainPanel.transform, "NextRiddleButton", "Next →",
+            new Vector2(120, 40), new Vector2(200, 100));
+        
+        // Create progress display
+        GameObject progressDisplay = CreateText(mainPanel.transform, "RiddleProgressDisplay", "Riddle 1 of 4",
+            new Vector2(200, 30), new Vector2(0, 130));
+        
+        // Create input field
+        GameObject inputField = CreateInputField(mainPanel.transform, "RiddleAnswerInput", "Enter your answer...",
+            new Vector2(400, 40), new Vector2(0, 30));
+        
+        // Create action buttons
+        GameObject submitBtn = CreateButton(mainPanel.transform, "SubmitAnswerButton", "Submit Answer",
+            new Vector2(150, 40), new Vector2(-100, -20));
+        GameObject resetBtn = CreateButton(mainPanel.transform, "ResetButton", "Clear",
+            new Vector2(100, 40), new Vector2(100, -20));
+        
+        // Create solved riddles display
+        GameObject solvedDisplay = CreateText(mainPanel.transform, "SolvedRiddlesDisplay", "Solved Riddles:\nNone solved yet",
+            new Vector2(300, 150), new Vector2(-200, -100));
+        solvedDisplay.GetComponent<TMP_Text>().fontSize = 14;
+        
+        // Create feedback text
+        GameObject feedback = CreateText(mainPanel.transform, "FeedbackText", "Welcome to the Riddle Challenge!",
+            new Vector2(600, 60), new Vector2(0, -180));
+        feedback.GetComponent<TMP_Text>().fontSize = 16;
+        feedback.GetComponent<TMP_Text>().color = Color.cyan;
+        
+        // Create close button
+        GameObject closeBtn = CreateButton(mainPanel.transform, "CloseButton", "Close",
+            new Vector2(100, 40), new Vector2(300, 250));
+        
+        // Create puzzle component
+        GameObject riddlePuzzle = new GameObject("RiddlePuzzleController");
+        RiddlePuzzle puzzle = riddlePuzzle.AddComponent<RiddlePuzzle>();
+        
+        // Connect references
+        puzzle.puzzleUI = canvas;
+        puzzle.riddleDisplay = riddleDisplay.GetComponent<TMP_Text>();
+        puzzle.riddleProgressDisplay = progressDisplay.GetComponent<TMP_Text>();
+        puzzle.riddleAnswerInput = inputField.GetComponent<TMP_InputField>();
+        puzzle.submitAnswerButton = submitBtn.GetComponent<Button>();
+        puzzle.nextRiddleButton = nextBtn.GetComponent<Button>();
+        puzzle.previousRiddleButton = prevBtn.GetComponent<Button>();
+        puzzle.solvedRiddlesDisplay = solvedDisplay.GetComponent<TMP_Text>();
+        puzzle.resetButton = resetBtn.GetComponent<Button>();
+        puzzle.feedbackText = feedback.GetComponent<TMP_Text>();
+        puzzle.closeButton = closeBtn.GetComponent<Button>();
+        
+        Debug.Log("Riddle Puzzle setup complete! Don't forget to assign the AI Terminal reference in the inspector.");
     }
 }
 #endif

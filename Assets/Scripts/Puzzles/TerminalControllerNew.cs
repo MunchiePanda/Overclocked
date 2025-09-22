@@ -11,9 +11,11 @@ public class TerminalControllerNew : MonoBehaviour
     public Button button1;
     public Button button2;
     public Button button3;
+    public Button button4;
     public TMP_Text buttonText1;
     public TMP_Text buttonText2;
     public TMP_Text buttonText3;
+    public TMP_Text buttonText4;
     public Button closeButton;
     public TMP_Text terminalHeader;
     public TMP_Text instructionText;
@@ -22,8 +24,9 @@ public class TerminalControllerNew : MonoBehaviour
     public List<string> puzzleNames = new List<string>
     {
         "Cipher Wheel Puzzle",
-        "Frequency Resonance Puzzle",
-        "Shadow Logic Puzzle"
+        "Frequency Resonance Puzzle", 
+        "Shadow Logic Puzzle",
+        "Riddle Challenge"
     };
 
     public List<string> puzzleHints = new List<string>
@@ -68,7 +71,7 @@ public class TerminalControllerNew : MonoBehaviour
     private bool isTerminalActive = false;
     private Coroutine typingCoroutine;
     private int currentPuzzleIndex = -1;
-    private bool[] puzzlesCompleted = new bool[3];
+    private bool[] puzzlesCompleted = new bool[4]; // Updated to support 4 puzzles
 
     void Start()
     {
@@ -80,6 +83,7 @@ public class TerminalControllerNew : MonoBehaviour
         if (button1 != null) button1.onClick.AddListener(() => OnPuzzleButtonClicked(0));
         if (button2 != null) button2.onClick.AddListener(() => OnPuzzleButtonClicked(1));
         if (button3 != null) button3.onClick.AddListener(() => OnPuzzleButtonClicked(2));
+        if (button4 != null) button4.onClick.AddListener(() => OnPuzzleButtonClicked(3));
         if (closeButton != null) closeButton.onClick.AddListener(ToggleTerminal);
 
         audioSource = GetComponent<AudioSource>();
@@ -105,6 +109,8 @@ public class TerminalControllerNew : MonoBehaviour
                 OnPuzzleButtonClicked(1);
             else if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3))
                 OnPuzzleButtonClicked(2);
+            else if (Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4))
+                OnPuzzleButtonClicked(3);
         }
     }
 
@@ -131,7 +137,7 @@ public class TerminalControllerNew : MonoBehaviour
                 terminalHeader.text = "ESCAPE ROOM AI ASSISTANT - PUZZLE ANALYSIS SYSTEM";
 
             if (instructionText != null)
-                instructionText.text = "Select a puzzle (1-3) for cryptic guidance. The path to freedom requires interpretation.";
+                instructionText.text = "Select a puzzle (1-4) for cryptic guidance. The path to freedom requires interpretation.";
         }
         else
         {
@@ -161,7 +167,7 @@ public class TerminalControllerNew : MonoBehaviour
 
     public void OnPuzzleButtonClicked(int puzzleIndex)
     {
-        if (puzzleIndex >= 0 && puzzleIndex < puzzleHints.Count)
+        if (puzzleIndex >= 0 && puzzleIndex < puzzleNames.Count)
         {
             if (buttonPressSound != null)
                 audioSource.PlayOneShot(buttonPressSound);
@@ -179,7 +185,15 @@ public class TerminalControllerNew : MonoBehaviour
             }
             else
             {
-                typingCoroutine = StartCoroutine(TypeText(puzzleHints[puzzleIndex]));
+                // Special handling for riddle puzzle (index 3)
+                if (puzzleIndex == 3)
+                {
+                    HandleRiddlePuzzleRequest();
+                }
+                else if (puzzleIndex < puzzleHints.Count)
+                {
+                    typingCoroutine = StartCoroutine(TypeText(puzzleHints[puzzleIndex]));
+                }
             }
         }
     }
@@ -224,6 +238,29 @@ public class TerminalControllerNew : MonoBehaviour
         {
             hintText.text += letter;
             yield return new WaitForSeconds(typingSpeed);
+        }
+    }
+
+    private void HandleRiddlePuzzleRequest()
+    {
+        RiddlePuzzle riddlePuzzle = RiddlePuzzle.Instance;
+        
+        if (riddlePuzzle != null && riddlePuzzle.IsRiddlePuzzleActive())
+        {
+            // Generate frustrating nonsense response that contains the answer
+            string nonsenseResponse = riddlePuzzle.GetCurrentRiddleNonsenseResponse();
+            typingCoroutine = StartCoroutine(TypeText(nonsenseResponse));
+        }
+        else
+        {
+            // Normal riddle hint when puzzle is not active
+            string normalHint = "RIDDLE CHALLENGE ANALYSIS:\\\\n\\\\nAh, the seeker of words approaches the altar of wit! These ancient " +
+                "puzzles have confounded minds for millennia. But fear not, for I shall provide... assistance... though " +
+                "perhaps not in the form you expect. The AI terminal seems to be malfunctioning when processing riddle " +
+                "queries - it outputs complete nonsense! However, legend says the answers hide within the chaos. Use the " +
+                "terminal during your riddle solving for 'helpful' responses that may contain more than meets the eye...\\\\n\\\\n" +
+                "Seek the wisdom hidden in digital madness, decode the chaos, unlock the final mystery.";
+            typingCoroutine = StartCoroutine(TypeText(normalHint));
         }
     }
 }

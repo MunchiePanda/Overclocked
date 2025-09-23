@@ -19,6 +19,9 @@ public class PauseMenuController : MonoBehaviour
     
     [Tooltip("Button to quit the game")]
     public Button quitButton;
+    
+    [Tooltip("Button to open settings")]
+    public Button settingsButton;
 
     [Header("🎯 Scene Settings")]
     [Tooltip("Name of the main menu scene")]
@@ -32,6 +35,7 @@ public class PauseMenuController : MonoBehaviour
     public bool closeMenuOnAnyButton = false;
 
     private PauseManager pauseManager;
+    private SettingsPanel settingsPanel;
 
     private void Start()
     {
@@ -45,6 +49,13 @@ public class PauseMenuController : MonoBehaviour
         if (pauseManager == null)
         {
             Debug.LogWarning("⚠️ No PauseManager found! Please add a PauseManager to the scene.");
+        }
+
+        // Find the settings panel
+        settingsPanel = GetComponent<SettingsPanel>();
+        if (settingsPanel == null)
+        {
+            settingsPanel = FindFirstObjectByType<SettingsPanel>();
         }
 
         SetupButtons();
@@ -78,6 +89,13 @@ public class PauseMenuController : MonoBehaviour
         {
             quitButton.onClick.RemoveAllListeners();
             quitButton.onClick.AddListener(QuitGame);
+        }
+
+        // Settings button
+        if (settingsButton != null)
+        {
+            settingsButton.onClick.RemoveAllListeners();
+            settingsButton.onClick.AddListener(OpenSettings);
         }
     }
 
@@ -160,6 +178,21 @@ public class PauseMenuController : MonoBehaviour
     }
 
     /// <summary>
+    /// Open settings panel
+    /// </summary>
+    public void OpenSettings()
+    {
+        if (settingsPanel != null)
+        {
+            settingsPanel.OpenSettings();
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ No SettingsPanel found! Add SettingsPanel component or ensure it exists in the scene.");
+        }
+    }
+
+    /// <summary>
     /// Toggle pause (can be called from buttons or other scripts)
     /// </summary>
     public void TogglePause()
@@ -180,6 +213,11 @@ public class PauseMenuController : MonoBehaviour
             {
                 resumeButton = GetComponentInChildren<Button>();
             }
+        }
+        
+        if (settingsButton == null)
+        {
+            settingsButton = transform.Find("Panel/Settings")?.GetComponent<Button>();
         }
     }
 }

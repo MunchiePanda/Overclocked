@@ -36,6 +36,13 @@ public class Door : MonoBehaviour
     [Tooltip("The color to use when the door is locked")]
     public Color lockedColor = Color.red;
 
+    [Header("End Screen Integration")]
+    [Tooltip("Win screen to show when door is unlocked")]
+    public WinScreen winScreen;
+
+    [Tooltip("Show end screen immediately when door unlocks")]
+    public bool showEndScreenOnUnlock = true;
+
     private bool isUnlocked = false;
     private MeshRenderer meshRenderer;
     private Material originalMaterial;
@@ -50,6 +57,16 @@ public class Door : MonoBehaviour
         {
             originalMaterial = meshRenderer.material;
             originalColor = meshRenderer.material.color;
+        }
+
+        // Auto-find WinScreen if not assigned
+        if (winScreen == null)
+        {
+            winScreen = FindFirstObjectByType<WinScreen>();
+            if (winScreen != null)
+            {
+                Debug.Log($"✅ Auto-assigned WinScreen to door '{gameObject.name}'");
+            }
         }
 
         // Set initial state
@@ -72,7 +89,7 @@ public class Door : MonoBehaviour
         {
             // Correct code - unlock the door
             isUnlocked = true;
-            Debug.Log("Door unlocked!");
+            Debug.Log("🎉 Door unlocked!");
 
             // Show feedback
             if (feedbackText != null)
@@ -89,11 +106,21 @@ public class Door : MonoBehaviour
             // Update visual state
             UpdateVisualState();
 
-            // Notify escape code manager if this is the final escape
+            // Show end screen if enabled
+            if (showEndScreenOnUnlock && winScreen != null)
+            {
+                Debug.Log("🏆 Showing end screen - door unlocked!");
+                StartCoroutine(ShowEndScreenWithDelay());
+            }
+            else if (showEndScreenOnUnlock)
+            {
+                Debug.LogWarning("⚠️ WinScreen not assigned! Cannot show end screen.");
+            }
+
+            // Legacy support - still notify escape code manager if present
             EscapeCodeManager escapeManager = FindFirstObjectByType<EscapeCodeManager>();
             if (escapeManager != null && escapeManager.IsEscapeCodeReady())
             {
-                // Add a small delay for dramatic effect
                 StartCoroutine(TriggerEscapeSequence(escapeManager));
             }
         }
@@ -189,6 +216,24 @@ public class Door : MonoBehaviour
     }
     
     /// <summary>
+    /// Show the end screen with dramatic timing
+    /// </summary>
+    private System.Collections.IEnumerator ShowEndScreenWithDelay()
+    {
+        Debug.Log("🎬 Starting end screen sequence...");
+        
+        // Optional: Add some dramatic visual effects here
+        yield return new WaitForSeconds(1.5f);
+        
+        // Show the win screen
+        if (winScreen != null)
+        {
+            winScreen.ShowWinScreen();
+            Debug.Log("🎆 End screen displayed!");
+        }
+    }
+    
+    /// <summary>
     /// Trigger the escape sequence with dramatic timing
     /// </summary>
     /// <param name="escapeManager">The escape code manager</param>
@@ -204,4 +249,9 @@ public class Door : MonoBehaviour
         
         Debug.Log("🏆 Escape successful!");
     }
+
+    /// <summary>
+    /// Public property to check if door is unlocked (for other scripts)
+    /// </summary>
+    public bool IsUnlocked => isUnlocked;
 }

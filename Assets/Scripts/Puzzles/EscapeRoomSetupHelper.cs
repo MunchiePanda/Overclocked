@@ -2,9 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-#if UNITY_EDITOR
-using UnityEditor;
-
 public class EscapeRoomSetupHelper : MonoBehaviour
 {
     [Header("🎯 NEW TERMINAL SYSTEM - Unity 6 Compatible")]
@@ -1093,4 +1090,3 @@ public class EscapeRoomSetupHelper : MonoBehaviour
         Debug.Log("Riddle Puzzle setup complete! Don't forget to assign the AI Terminal reference in the inspector.");
     }
 }
-#endif

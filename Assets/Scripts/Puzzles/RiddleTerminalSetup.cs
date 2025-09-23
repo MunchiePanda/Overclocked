@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 #if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 /// <summary>
 /// Setup helper for creating riddle terminals in Unity 6
@@ -530,6 +531,7 @@ public class RiddleTerminalSetup : MonoBehaviour
     }
 }
 
+#if UNITY_EDITOR
 // Custom Editor for better workflow
 [CustomEditor(typeof(RiddleTerminalSetup))]
 public class RiddleTerminalSetupEditor : Editor

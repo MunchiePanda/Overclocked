@@ -17,13 +17,13 @@ public class QuickRiddleTerminalTest : MonoBehaviour
     public bool enableDebugLogs = true;
 
     [Header("Test Status")]
-    [SerializeField, ReadOnly]
+    [SerializeField]
     private bool terminalCreated = false;
     
-    [SerializeField, ReadOnly]
+    [SerializeField]
     private bool riddlePuzzleFound = false;
     
-    [SerializeField, ReadOnly]
+    [SerializeField]
     private GameObject testTerminal;
 
     void Start()

@@ -223,7 +223,7 @@ public class UISetupHelper : MonoBehaviour
     private void CreateEventSystemIfNeeded()
     {
         // Check if EventSystem already exists
-        EventSystem existingEventSystem = FindObjectOfType<EventSystem>();
+        EventSystem existingEventSystem = FindFirstObjectByType<EventSystem>();
         if (existingEventSystem == null)
         {
             // Create EventSystem

@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System.Collections;
 
 /// <summary>
 /// Handles door functionality, including locking and unlocking
@@ -92,7 +93,8 @@ public class Door : MonoBehaviour
             EscapeCodeManager escapeManager = FindFirstObjectByType<EscapeCodeManager>();
             if (escapeManager != null && escapeManager.IsEscapeCodeReady())
             {
-                escapeManager.OnEscapeSuccessful();
+                // Add a small delay for dramatic effect
+                StartCoroutine(TriggerEscapeSequence(escapeManager));
             }
         }
         else
@@ -184,5 +186,22 @@ public class Door : MonoBehaviour
         }
 
         Debug.Log("Door reset to locked state.");
+    }
+    
+    /// <summary>
+    /// Trigger the escape sequence with dramatic timing
+    /// </summary>
+    /// <param name="escapeManager">The escape code manager</param>
+    private System.Collections.IEnumerator TriggerEscapeSequence(EscapeCodeManager escapeManager)
+    {
+        Debug.Log("🎉 Starting escape sequence...");
+        
+        // Optional: Add some dramatic visual effects here
+        yield return new WaitForSeconds(1.5f);
+        
+        // Trigger the win screen
+        escapeManager.OnEscapeSuccessful();
+        
+        Debug.Log("🏆 Escape successful!");
     }
 }

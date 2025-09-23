@@ -13,7 +13,7 @@ public class EscapeCodeManager : MonoBehaviour
     public Door escapeDoor;
     
     [Tooltip("Win screen to show when escape is successful")]
-    public GameObject winScreen;
+    public WinScreen winScreen;
 
     [Header("UI References")]
     [Tooltip("Display showing collected numbers")]
@@ -248,10 +248,11 @@ public class EscapeCodeManager : MonoBehaviour
         
         if (winScreen != null)
         {
-            winScreen.SetActive(true);
-            Time.timeScale = 0f; // Pause the game
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            winScreen.ShowWinScreen();
+        }
+        else
+        {
+            Debug.LogWarning("Win screen component not assigned!");
         }
     }
 
@@ -269,8 +270,7 @@ public class EscapeCodeManager : MonoBehaviour
 
         if (winScreen != null)
         {
-            winScreen.SetActive(false);
-            Time.timeScale = 1f;
+            winScreen.HideWinScreen();
         }
 
         if (instructionsPanel != null)

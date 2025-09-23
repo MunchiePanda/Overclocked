@@ -44,9 +44,9 @@ public class PlayerController : MonoBehaviour
         playerCamera = Camera.main;
         playerCamera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraYOffset, transform.position.z);
         playerCamera.transform.SetParent(transform);
-        // Lock cursor
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        
+        // Request default gameplay cursor (lowest priority, will be overridden by UI)
+        PauseManager.RequestCursor("PlayerController", CursorLockMode.Locked, false, 0);
     }
 
     void Update()
@@ -152,6 +152,15 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log($"Interacting with {currentInteractable}");
             currentInteractable.OnInteract();
+        }
+    }
+
+    void OnDestroy()
+    {
+        // Release cursor control when player is destroyed
+        if (_avatar != null && _avatar.IsMe)
+        {
+            PauseManager.ReleaseCursor("PlayerController");
         }
     }
 }

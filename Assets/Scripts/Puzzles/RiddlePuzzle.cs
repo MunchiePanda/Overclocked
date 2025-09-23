@@ -55,15 +55,35 @@ public class RiddlePuzzle : BasePuzzle
             riddle = "I speak without a mouth and hear without ears. I have no body, but come alive with wind. What am I?",
             answer = "ECHO",
             hint = "Sound that bounces back to you."
-        },
-        new RiddleData
-        {
-            riddle = "The more you take, the more you leave behind. What am I?",
-            answer = "FOOTSTEPS",
-            hint = "Think about walking somewhere."
         }
     };
 
+    [Header("Timer Settings")]
+    [Tooltip("Time limit for solving all riddles (in seconds)")]
+    public float timeLimit = 300f; // 5 minutes default
+    
+    [Tooltip("Text display for remaining time")]
+    public TMP_Text timerDisplay;
+    
+    [Tooltip("Warning color when time is running low")]
+    public Color warningColor = Color.red;
+    
+    [Tooltip("Normal timer color")]
+    public Color normalTimerColor = Color.white;
+
+    [Header("Win/Lose Screens")]
+    [Tooltip("Screen shown when player completes all riddles")]
+    public GameObject winScreen;
+    
+    [Tooltip("Screen shown when timer runs out")]
+    public GameObject loseScreen;
+    
+    [Tooltip("Text showing completion time on win screen")]
+    public TMP_Text completionTimeText;
+    
+    [Tooltip("Text showing failure reason on lose screen")]
+    public TMP_Text failureReasonText;
+    
     [Header("AI Terminal Integration")]
     [Tooltip("Reference to the terminal controller for generating nonsense responses")]
     public TerminalControllerNew aiTerminal;
@@ -81,6 +101,11 @@ public class RiddlePuzzle : BasePuzzle
     private List<bool> riddlesSolved = new List<bool>();
     private int randomNumber;
     private static RiddlePuzzle instance;
+    
+    // Timer variables
+    private float currentTime;
+    private bool timerActive = false;
+    private float startTime;
 
     [System.Serializable]
     public class RiddleData
@@ -96,6 +121,23 @@ public class RiddlePuzzle : BasePuzzle
     }
 
     public static RiddlePuzzle Instance => instance;
+
+    private void Update()
+    {
+        // Update timer if active
+        if (timerActive && !isCompleted)
+        {
+            currentTime -= Time.deltaTime;
+            
+            if (currentTime <= 0)
+            {
+                currentTime = 0;
+                OnTimerExpired();
+            }
+            
+            UpdateTimerDisplay();
+        }
+    }
 
     private void Start()
     {
@@ -113,6 +155,13 @@ public class RiddlePuzzle : BasePuzzle
             {
                 Debug.LogError("Could not find RiddleCanvas!");
             }
+        }
+        
+        // Initialize timer display
+        if (timerDisplay != null)
+        {
+            timerDisplay.color = normalTimerColor;
+            UpdateTimerDisplay();
         }
     }
 
@@ -288,8 +337,14 @@ public class RiddlePuzzle : BasePuzzle
                 
                 if (allSolved)
                 {
+                    StopTimer();
+                    float completionTime = timeLimit - currentTime;
+                    
                     GiveFeedback($"🎉 All riddles solved! Your escape number is: {randomNumber}");
                     CompletePuzzle();
+                    
+                    // Show win screen
+                    ShowWinScreen(completionTime);
                     
                     // Notify the escape code manager
                     EscapeCodeManager escapeManager = FindFirstObjectByType<EscapeCodeManager>();
@@ -329,19 +384,49 @@ public class RiddlePuzzle : BasePuzzle
         
         if (riddleAnswerInput != null)
             riddleAnswerInput.text = "";
+        
+        // Reset timer
+        StopTimer();
+        currentTime = timeLimit;
+        
+        // Hide win/lose screens
+        if (winScreen != null) winScreen.SetActive(false);
+        if (loseScreen != null) loseScreen.SetActive(false);
             
         UpdateDisplay();
+        UpdateTimerDisplay();
     }
 
     public override void ShowPuzzle()
     {
         base.ShowPuzzle();
         
+        // Request cursor for riddle puzzle using central management
+        PauseManager.RequestCursor("RiddlePuzzle", CursorLockMode.None, true, 75);
+        
+        // Start timer
+        StartTimer();
+        
         if (riddleAnswerInput != null)
         {
             riddleAnswerInput.ActivateInputField();
             riddleAnswerInput.Select();
         }
+        
+        Debug.Log("Riddle puzzle shown - cursor requested through central management, timer started");
+    }
+
+    public override void HidePuzzle()
+    {
+        base.HidePuzzle();
+        
+        // Release cursor through central management
+        PauseManager.ReleaseCursor("RiddlePuzzle");
+        
+        // Stop timer
+        StopTimer();
+        
+        Debug.Log("Riddle puzzle hidden - cursor released through central management, timer stopped");
     }
 
     // This method will be called by the AI terminal when player asks for help
@@ -386,5 +471,115 @@ public class RiddlePuzzle : BasePuzzle
             if (solved) count++;
         }
         return count;
+    }
+    
+    // Timer management methods
+    private void StartTimer()
+    {
+        currentTime = timeLimit;
+        timerActive = true;
+        startTime = Time.time;
+        UpdateTimerDisplay();
+        Debug.Log($"Timer started: {timeLimit} seconds");
+    }
+    
+    private void StopTimer()
+    {
+        timerActive = false;
+        Debug.Log("Timer stopped");
+    }
+    
+    private void UpdateTimerDisplay()
+    {
+        if (timerDisplay == null) return;
+        
+        // Ensure currentTime is not negative
+        float displayTime = Mathf.Max(0, currentTime);
+        
+        int minutes = Mathf.FloorToInt(displayTime / 60);
+        int seconds = Mathf.FloorToInt(displayTime % 60);
+        
+        timerDisplay.text = $"Time: {minutes:00}:{seconds:00}";
+        
+        // Change color if time is running low (less than 1 minute)
+        if (displayTime <= 60f)
+        {
+            timerDisplay.color = warningColor;
+        }
+        else
+        {
+            timerDisplay.color = normalTimerColor;
+        }
+    }
+    
+    private void OnTimerExpired()
+    {
+        timerActive = false;
+        
+        GiveFeedback("⏰ Time's up! Riddle challenge failed.");
+        
+        // Show lose screen
+        ShowLoseScreen("Time limit exceeded");
+        
+        Debug.Log("Timer expired - riddle puzzle failed");
+    }
+    
+    // Win/Lose screen management
+    private void ShowWinScreen(float completionTime)
+    {
+        if (winScreen != null)
+        {
+            winScreen.SetActive(true);
+            
+            if (completionTimeText != null)
+            {
+                int minutes = Mathf.FloorToInt(completionTime / 60);
+                int seconds = Mathf.FloorToInt(completionTime % 60);
+                completionTimeText.text = $"Completion Time: {minutes:00}:{seconds:00}";
+            }
+            
+            Debug.Log($"Win screen shown - completed in {completionTime:F1} seconds");
+        }
+    }
+    
+    private void ShowLoseScreen(string reason)
+    {
+        if (loseScreen != null)
+        {
+            loseScreen.SetActive(true);
+            
+            if (failureReasonText != null)
+            {
+                failureReasonText.text = $"Challenge Failed: {reason}";
+            }
+            
+            Debug.Log($"Lose screen shown - reason: {reason}");
+        }
+    }
+    
+    // Public method to retry the puzzle
+    public void RetryPuzzle()
+    {
+        // Hide win/lose screens
+        if (winScreen != null) winScreen.SetActive(false);
+        if (loseScreen != null) loseScreen.SetActive(false);
+        
+        // Reset the puzzle
+        ResetPuzzle();
+        
+        // Restart timer
+        StartTimer();
+        
+        Debug.Log("Riddle puzzle restarted");
+    }
+    
+    // Public method to get time remaining
+    public float GetTimeRemaining() => currentTime;
+    
+    // Public method to get completion percentage
+    public float GetCompletionPercentage()
+    {
+        if (riddles.Count == 0) return 0f;
+        return (float)GetSolvedCount() / riddles.Count;
     }
 }

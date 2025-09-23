@@ -14,6 +14,7 @@ namespace Alteruna
 		[SerializeField] private GameObject ContentContainer;
 		[SerializeField] private Button StartButton;
 		[SerializeField] private Button LeaveButton;
+		[SerializeField] private GameObject roomMenuObject;
 
 		public bool ShowUserCount = false;
 
@@ -51,14 +52,19 @@ namespace Alteruna
 				Multiplayer.OnRoomJoined.AddListener(JoinedRoom);
 				Multiplayer.OnRoomLeft.AddListener(LeftRoom);
 
-				StartButton.onClick.AddListener(() =>
-				{
-					// for more control, use Multiplayer.CreateRoom
-					Multiplayer.JoinOnDemandRoom();
-					_refreshTime = RefreshInterval;
-				});
+                StartButton.onClick.AddListener(() =>
+                {
+                    // for more control, use Multiplayer.CreateRoom
+                    Multiplayer.JoinOnDemandRoom();
+                    _refreshTime = RefreshInterval;
 
-				LeaveButton.onClick.AddListener(() =>
+                    // Hide the room menu
+                    if (roomMenuObject != null)
+                        roomMenuObject.SetActive(false);
+                });
+
+
+                LeaveButton.onClick.AddListener(() =>
 				{
 					Multiplayer.CurrentRoom?.Leave();
 					_refreshTime = RefreshInterval;

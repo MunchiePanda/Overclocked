@@ -291,16 +291,16 @@ public class PuzzleTerminal : MonoBehaviour, IInteractable
         // Update cursor state and player movement
         if (isTerminalOpen)
         {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            // Request cursor for terminal UI
+            PauseManager.RequestCursor("PuzzleTerminal", CursorLockMode.None, true, 75);
             
             if (currentPlayer != null)
                 currentPlayer.canMove = false;
         }
         else
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            // Release cursor control
+            PauseManager.ReleaseCursor("PuzzleTerminal");
             
             if (currentPlayer != null)
                 currentPlayer.canMove = true;

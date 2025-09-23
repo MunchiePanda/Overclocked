@@ -23,10 +23,10 @@ public class TerminalControllerNew : MonoBehaviour
     [Header("Puzzle Settings")]
     public List<string> puzzleNames = new List<string>
     {
-        "Cipher Wheel Puzzle",
-        "Frequency Resonance Puzzle", 
-        "Shadow Logic Puzzle",
-        "Riddle Challenge"
+        "Riddle Challenge",
+        "Cipher Wheel Puzzle", 
+        "Color Light Puzzle",
+        "Advanced Terminal Access"
     };
 
     public List<string> puzzleHints = new List<string>

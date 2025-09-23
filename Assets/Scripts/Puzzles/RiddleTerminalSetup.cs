@@ -108,8 +108,10 @@ public class RiddleTerminalSetup : MonoBehaviour
             Debug.Log($"✅ Riddle terminal '{terminalName}' created successfully!");
             Debug.Log("Players can now interact with the terminal to access riddle puzzles.");
             
-            // Select the created terminal
+            // Select the created terminal (editor only)
+            #if UNITY_EDITOR
             Selection.activeGameObject = terminal;
+            #endif
         }
         catch (System.Exception e)
         {

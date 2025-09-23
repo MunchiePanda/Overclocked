@@ -6666,7 +6666,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: 'Enter door code:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -11688,7 +11688,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Press E to access door
+  m_text: Press E to open door
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -12703,13 +12703,13 @@ MonoBehaviour:
   interactionDistance: 3
   playerLayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 128
   interactionInput: Interact
-  doorUICanvas: {fileID: 0}
-  codeInputField: {fileID: 0}
-  submitButton: {fileID: 0}
-  closeButton: {fileID: 0}
-  feedbackText: {fileID: 0}
+  doorUICanvas: {fileID: 1558726887}
+  codeInputField: {fileID: 601664810}
+  submitButton: {fileID: 261486363}
+  closeButton: {fileID: 1925850805}
+  feedbackText: {fileID: 53027324}
   interactionPrompt: {fileID: 962326840}
   interactionPromptText: {fileID: 833193779}
   promptMessage: Press E to open door
@@ -17659,7 +17659,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Press E to access door
+  m_text: Press E to open door
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
